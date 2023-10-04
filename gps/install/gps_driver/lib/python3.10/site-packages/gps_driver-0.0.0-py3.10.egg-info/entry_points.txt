@@ -1,0 +1,3 @@
+[console_scripts]
+gps_publisher = gps_driver.gps_publisher:main
+
