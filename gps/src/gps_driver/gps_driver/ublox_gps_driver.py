@@ -1,40 +1,30 @@
-# Description: This is a driver for the ublox gps module. It is used to get the latitude and longitude of the gps module.
-
 from ublox_gps import UbloxGps
 import serial
-# Can also use SPI here - import spidev
-# I2C is not supported
-
-port = serial.Serial('/dev/ttyACM0', baudrate=38400, timeout=1)
-gps = UbloxGps(port)
-relPointLat = 33.5530609
-relPointLon = -117.6644828
-
-        
-
-def run():
-
-    try: 
-        print("Listenting for UBX Messages.")
-       
-        while True:
-            try: 
-                coords = gps.geo_coords()
-                coordsRefLat = coords.lat - relPointLat
-                coordsRefLon = coords.lon - relPointLon
-                # Format latitude and longitude to 7 decimal places and print
-                # print("Latitude: {:.7f}, Longitude: {:.7f}".format(coords.lat, coords.lon))
-                print("Rel Latitude: {:.7f}, Rel Longitude: {:.7f}".format(coordsRefLat, coordsRefLon))
 
 
-            except (ValueError, IOError) as err:
-                print(err)
+class GPSModel:
 
-    except KeyboardInterrupt:
-        print("\nExiting Program")
+    def __init__(self, dev_path: str):
+        self.gps = UbloxGps(serial.Serial("dev_path", baudrate=38400, timeout=1))
 
-    finally:
-        port.close()
+    def get_coords(self):
+        try:
+            coords = self.gps.geo_coords()
+            return coords.lat, coords.lon
+        except (ValueError, IOError):
+            print("Error: Could not parse GPS coords.")
+        return None
+
+
+def main():
+    gps = GPSModel('/dev/ttyACM0')
+
+    while True:
+        try:
+            lat, lon = gps.get_coords()
+            print("Rel Latitude: {:.7f}, Rel Longitude: {:.7f}".format(lat, lon))
+        except KeyboardInterrupt:
+            print("exit")
 
 if __name__ == '__main__':
-  run()
+    main()
