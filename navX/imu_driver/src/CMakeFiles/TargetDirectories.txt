@@ -1,3 +1,0 @@
-/home/cameron/workspaces/autonomy_demo/navX/imu_driver/src/CMakeFiles/NavXTimeStamp.dir
-/home/cameron/workspaces/autonomy_demo/navX/imu_driver/src/CMakeFiles/edit_cache.dir
-/home/cameron/workspaces/autonomy_demo/navX/imu_driver/src/CMakeFiles/rebuild_cache.dir
