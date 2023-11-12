@@ -1,0 +1,7 @@
+# Display robot URDF visualization
+# Note: starts up these nodes: 
+#       robot_state_publisher_node, 
+#       robot_localization_node,
+#       rviz_node
+
+ros2 launch sam_bot_description display.launch.py

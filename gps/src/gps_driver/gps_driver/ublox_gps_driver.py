@@ -2,7 +2,7 @@ from ublox_gps import UbloxGps
 import serial
 
 
-class GPSModel:
+class GPS_Model:
 
     def __init__(self, dev_path: str):
         try:
