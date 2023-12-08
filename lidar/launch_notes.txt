@@ -3,3 +3,6 @@ ros2 launch sllidar_ros2 sllidar_a2m8_launch.py scan_mode:='Standard' frame_id:=
 
 # Launch lidar node with rviz visualization
 ros2 launch sllidar_ros2 view_sllidar_a2m8_launch.py scan_mode:='Standard' frame_id:='lidar_link'
+
+# Launch SLAM ToolBox
+ros2 launch slam_toolbox online_async_launch.py --ros-args -r /scan:=/scan_filtered

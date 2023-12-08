@@ -28,24 +28,24 @@
     </joint>
 
     <!-- Robot IMU -->
-    <link name="imu_link">
-        <visual>
-            <geometry>
-                <box size="0.1 0.1 0.1"/>
-            </geometry>
-        </visual>
+    <!-- <link name="imu_link"> -->
+        <!-- <visual> -->
+            <!-- <geometry> -->
+                <!-- <box size="0.1 0.1 0.1"/> -->
+            <!-- </geometry> -->
+        <!-- </visual> -->
     <!-- <collision>
     <geometry>
         <box size="0.1 0.1 0.1"/>
     </geometry>
     </collision> -->
-    </link>
+    <!-- </link> -->
 
-    <joint name="imu_joint" type="fixed">
-        <parent link="base_link"/>
-        <child link="imu_link"/>
-        <origin xyz="0 0 0.01"/>
-    </joint>
+    <!-- <joint name="imu_joint" type="fixed"> -->
+        <!-- <parent link="base_link"/> -->
+        <!-- <child link="imu_link"/> -->
+        <!-- <origin xyz="0 0 0.01"/> -->
+    <!-- </joint> -->
 
     <!-- Robot LIDAR -->
     <link name="lidar_link">
@@ -61,6 +61,22 @@
         <parent link="base_link"/>
         <child link="lidar_link"/>
         <origin xyz="0 0 0.12" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Robot ZED 2i Camera -->
+    <link name="zed_camera_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <box size="0.04 0.2 0.035"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="zed_camera_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="zed_camera_link"/>
+        <origin xyz="0.23 0 0" rpy="0 0 0"/>
     </joint>
 
 </robot>

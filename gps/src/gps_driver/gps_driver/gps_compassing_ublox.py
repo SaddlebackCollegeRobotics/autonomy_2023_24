@@ -27,7 +27,7 @@ def get_coords(gps_list):
 
 cv2.namedWindow("preview")
 
-gps_list = [GPS_Model("/dev/ttyUSB0"), GPS_Model("/dev/ttyUSB1")]
+gps_list = [GPS_Model("/dev/ttyACM1"), GPS_Model("/dev/ttyACM2")]
 
 while True:
         

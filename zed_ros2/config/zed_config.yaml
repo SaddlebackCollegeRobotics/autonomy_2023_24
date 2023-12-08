@@ -1,0 +1,14 @@
+---
+/**:
+    ros__parameters:
+        pos_tracking:
+
+            publish_tf: false # Disables odom -> base_link TF transformation
+            # publish_map_tf: true # Disables map -> odom TF transformation
+            area_memory: false # Disables loop closure computation, but Pose topic for global VSLAM still published (but now pure VIO)
+
+            # Optional optimizations
+            two_d_mode: false # Or true, up to you!
+            pos_tracking_enabled: true # of course!
+            path_max_count: 30
+            qos_depth: 5
