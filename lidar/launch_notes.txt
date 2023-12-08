@@ -6,3 +6,6 @@ ros2 launch sllidar_ros2 view_sllidar_a2m8_launch.py scan_mode:='Standard' frame
 
 # Launch SLAM ToolBox
 ros2 launch slam_toolbox online_async_launch.py --ros-args -r /scan:=/scan_filtered
+
+# Launch laser filter
+ros2 launch laser_filters angular_filter_example.launch.py
