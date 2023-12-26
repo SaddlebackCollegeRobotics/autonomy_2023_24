@@ -1,0 +1,9 @@
+Possible RTCM / Wiring setup for moving base and static base with moving rover.
+
+Static base will transfer RTCM3 over USB serial then the network to the moving base.
+Moving base will transfer RTCM3 over UART interface to the moving rover.
+
+Moving base and moving rover will be connected via USB for configurations / getting positions.
+
+If cannot get the relposned then use the previous absolute heading 1 visualizer code.
+Need to reduce Hz??

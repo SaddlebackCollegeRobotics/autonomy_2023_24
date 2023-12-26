@@ -1,3 +1,6 @@
+# Single static base station, two rover GNSS module setup.
+# Vector created between rover GNSS modules to get heading.
+
 # Using a surveyed GNSS module as a base station,
 # and two other GNSS modules as points on the rover receiving 
 # RTCM3 correction data from the base station,
@@ -11,10 +14,10 @@ import cv2
 import numpy as np
 import math
 
-base_serial_stream = Serial('/dev/ttyACM0', 9600, timeout=3)
+base_serial_stream = Serial('/dev/ttyACM0', 460800, timeout=3)
 
-rover_serial_stream_0 = Serial('/dev/ttyACM1', 9600, timeout=3)
-rover_serial_stream_1 = Serial('/dev/ttyACM2', 9600, timeout=3)
+rover_serial_stream_0 = Serial('/dev/ttyACM1', 460800, timeout=3)
+rover_serial_stream_1 = Serial('/dev/ttyACM2', 460800, timeout=3)
 
 print('Connected to serial ports.')
 
@@ -39,6 +42,12 @@ try:
         
         rover_coords_0 = rover_gps_0.geo_coords()
         rover_coords_1 = rover_gps_1.geo_coords()
+
+        if rover_coords_0 is not None:
+            print(f'GPS 0 Fix Type: {rover_coords_0.fixType}')
+        
+        if rover_coords_1 is not None:
+            print(f'GPS 1 Fix Type: {rover_coords_1.fixType}')
         
         output_string = ''
 
@@ -72,6 +81,8 @@ try:
         # convert to 0 to 360
         if angle < 0:
             angle += 360
+
+        print(f'Angle: {angle}')
 
         frame = np.ones((512, 512, 3), np.uint8) * 255
 
