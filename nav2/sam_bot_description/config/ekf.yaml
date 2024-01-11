@@ -53,22 +53,3 @@ ekf_filter_node:
         odom0_relative: true
         odom0_differential: false
         odom0_queue_size: 2
-        #odom0_pose_rejection_threshold: 0.2
-
-        # imu0: demo/imu
-        # imu0_config: [false, false, false,
-        #               false,  false,  false, # roll, pitch, yaw
-        #               false, false, false,
-        #               false, false, false,
-        #               true, true, false] # ax, ay, az
-
-        # imu0_relative: true
-        # imu0_queue_size: 5
-
-
-
-        # imu0_differential: false
-        # imu0_nodelay: false
-        # imu0_pose_rejection_threshold: 0.8                 # Note the difference in parameter names
-        # imu0_twist_rejection_threshold: 0.8                #
-        # imu0_linear_acceleration_rejection_threshold: 0.8

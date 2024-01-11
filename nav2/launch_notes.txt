@@ -8,4 +8,4 @@ ros2 launch sam_bot_description display.launch.py
 
 # Startup the nav2 system
 
-ros2 launch nav2_bringup navigation_launch.py params_file:='config/nav2_config.yaml'
+ros2 launch nav2_bringup navigation_launch.py params_file:='config/nav2_config4.yaml'
