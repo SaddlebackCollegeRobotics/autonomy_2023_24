@@ -1,6 +1,6 @@
 # Using 2 GPS, get vector between them, and draw it on screen
 
-from ublox_gps_driver import GPS_Model
+from gps_driver.gps_driver.ublox_gps_driver import GPS_Model
 import serial
 import time
 import math

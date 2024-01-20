@@ -1,104 +1,64 @@
-# Node that publishes GPS data (lat, long) to the topic 'gps_position'
+from serial import Serial
 
-# Ros2 imports
 import rclpy
 from rclpy.node import Node
-from sensor_msgs.msg import NavSatFix
+from rtcm_msgs.msg import Message as ROS_RTCM_Message
 
-# General imports
-import adafruit_gps
-import serial
-import os
-import subprocess
-import sys
+from pyrtcm import RTCMReader
+
+import numpy as np
 
 
-class GPS_Driver(Node):
+class MinimalPublisher(Node):
 
-    # Initialize publisher
     def __init__(self):
 
         # Give the node a name.
-        super().__init__('gps_driver')
+        super().__init__('minimal_publisher')
 
-        # Initialize and connect to GPS
-        self.init_GPS()
+        self.stream = Serial('/dev/ttyACM0', 460800, timeout=3)
+        self.rtcm_reader = RTCMReader(self.stream)
 
         # Specify data type and topic name. Specify queue size (limit amount of queued messages)
-        self.publisher_ = self.create_publisher(NavSatFix, 'gps_position', 10)
-
-        self.msg = NavSatFix()
+        self.publisher_ = self.create_publisher(ROS_RTCM_Message, '/gps/rtcm', 10)
 
         # Create a timer that will call the 'timer_callback' function every timer_period second.
-        timer_period = 0.5 # seconds
+        timer_period = 1/5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-
-    # Initialize and connect to GPS
-    def init_GPS(self):
-        
-        devpath = self.get_devpath()
-
-        if devpath is None:
-            self.get_logger().info("No GPS device found")
-            sys.exit()
-
-        uart = serial.Serial(devpath, baudrate=9600, timeout=10)
-
-        self.gps = adafruit_gps.GPS(uart, debug=False)
-        self.gps.send_command(b'PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0')
-        self.gps.send_command(b'PMTK220,1000')
-
-    
-    # Get path to GPS device
-    def get_devpath(self):
-
-        serial_number = "e688dad60ba4ec11b308e589a29c855c"
-        
-        getter_script = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../share/gps_driver/find_devpath.bash')
-        device_list = subprocess.run(["\"" + getter_script + "\""], stdout=subprocess.PIPE, text=True, shell=True, executable='/bin/bash').stdout.splitlines()
-        
-        for device in device_list:
-            splitStr = device.split(" - ")
-
-            if serial_number in splitStr[1]:
-                return splitStr[0]
-        
-        return None
-
+    def __del__(self):
+        self.stream.close()
 
     def timer_callback(self):
+        
+        self.msg = ROS_RTCM_Message()
+        (raw_data, parsed_data) = self.rtcm_reader.read()
 
-        self.gps.update()
-
-        # Wait for satellite connection
-        if not self.gps.has_fix:
-            self.get_logger().info("Waiting for fix...")
+        if raw_data is None:
             return
 
-        self.msg.latitude = self.gps.latitude
-        self.msg.longitude = self.gps.longitude
+        np_arr = np.frombuffer(raw_data, dtype=np.uint8)
 
-        # Publish the message.
+        if np_arr is None:
+            return
+
+        self.msg.message = np_arr.tolist()
+        self.msg.header.stamp = self.get_clock().now().to_msg()
+
         self.publisher_.publish(self.msg)
-
-        # Log the message.
-        location = "Publishing: " + str(self.msg.latitude) + " " + str(self.msg.longitude)
-        self.get_logger().info(location)
-
-
+        
 
 def main(args=None):
     rclpy.init(args=args)
 
-    gps_driver = GPS_Driver()
+    minimal_publisher = MinimalPublisher()
 
-    rclpy.spin(gps_driver)
+    rclpy.spin(minimal_publisher)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    gps_driver.destroy_node()
+    minimal_publisher.destroy_node()
     rclpy.shutdown()
 
 
