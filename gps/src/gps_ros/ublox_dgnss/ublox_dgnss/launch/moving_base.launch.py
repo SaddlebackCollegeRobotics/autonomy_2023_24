@@ -7,7 +7,7 @@ def generate_launch_description():
   """Generate launch description for ublox_dgnss components."""
   params_base= [
             {'DEVICE_SERIAL_STRING': "GPS_000"},
-            {'FRAME_ID': "base"},
+            {'FRAME_ID': "moving_base_gps"},
 
             # config measurement interval to 200 ms (ie 5 Hz) and nav update rate to once per measurement
             {'CFG_RATE_MEAS': 0xc8},

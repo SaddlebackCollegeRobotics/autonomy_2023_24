@@ -42,6 +42,8 @@ class MinimalPublisher(Node):
         if np_arr is None:
             return
 
+        print(np_arr.tolist())
+
         self.msg.message = np_arr.tolist()
         self.msg.header.stamp = self.get_clock().now().to_msg()
 

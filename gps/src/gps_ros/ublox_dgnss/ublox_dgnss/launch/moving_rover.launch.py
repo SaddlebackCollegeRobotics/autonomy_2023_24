@@ -5,9 +5,9 @@ from launch_ros.descriptions import ComposableNode
 
 def generate_launch_description():
   """Generate launch description for ublox_dgnss components."""
-  params_base= [
-            {'DEVICE_SERIAL_STRING': "GPS_000"},
-            {'FRAME_ID': "base"},
+  params_rover = [
+            {'DEVICE_SERIAL_STRING': "GPS_001"},
+            {'FRAME_ID': "moving_rover_gps"},
 
             # config measurement interval to 200 ms (ie 5 Hz) and nav update rate to once per measurement
             {'CFG_RATE_MEAS': 0xc8},
@@ -24,38 +24,34 @@ def generate_launch_description():
             # set UART2 baud rate to 460800
             {'CFG-UART2-BAUDRATE': 0x70800},
 
-            # send RTCM messages only (to rover) on UART2
+            # receive RTCM messages only (from base) on UART2
             {'CFG_UART2INPROT_NMEA': False},
-            {'CFG_UART2INPROT_RTCM3X': False},
+            {'CFG_UART2INPROT_RTCM3X': True},
             {'CFG_UART2INPROT_UBX': False},
             {'CFG_UART2OUTPROT_NMEA': False},
-            {'CFG_UART2OUTPROT_RTCM3X': True},
+            {'CFG_UART2OUTPROT_RTCM3X': False},
             {'CFG_UART2OUTPROT_UBX': False},
 
-            # RTCM and UBX messages as required on USB
+            # send/receive UBX messages only on USB
             {'CFG_USBINPROT_NMEA': False},
-            {'CFG_USBINPROT_RTCM3X': True},
+            {'CFG_USBINPROT_RTCM3X': False},
             {'CFG_USBINPROT_UBX': True},
             {'CFG_USBOUTPROT_NMEA': False},
             {'CFG_USBOUTPROT_RTCM3X': False},
             {'CFG_USBOUTPROT_UBX': True},
 
-            # output RTCM messages required for moving base+rover mode on UART2
-            {'CFG-MSGOUT-RTCM_3X_TYPE4072_0_UART2': 0x1},
-            {'CFG-MSGOUT-RTCM_3X_TYPE1074_UART2': 0x1},
-            {'CFG-MSGOUT-RTCM_3X_TYPE1084_UART2': 0x1},
-            {'CFG-MSGOUT-RTCM_3X_TYPE1124_UART2': 0x1},
-            {'CFG-MSGOUT-RTCM_3X_TYPE1230_UART2': 0x1},
-
             # messages required for navsatfix calcs by ROS node
             {'CFG_MSGOUT_UBX_NAV_HPPOSLLH_USB': 0x1},
             {'CFG_MSGOUT_UBX_NAV_COV_USB': 0x1},
             {'CFG_MSGOUT_UBX_NAV_STATUS_USB': 0x1},
-            {'CFG_MSGOUT_UBX_NAV_PVT_USB': 0x1},            
+            {'CFG_MSGOUT_UBX_NAV_PVT_USB': 0x1},
+
+            # output relative position messages
+            {'CFG_MSGOUT_UBX_NAV_RELPOSNED_USB': 0x1},
             ]
 
-  container_base = ComposableNodeContainer(
-    name='ublox_dgnss_moving_base',
+  container_rover = ComposableNodeContainer(
+    name='ublox_dgnss_rover',
     namespace='',
     package='rclcpp_components',
     executable='component_container_mt',
@@ -64,8 +60,8 @@ def generate_launch_description():
         package='ublox_dgnss_node',
         plugin='ublox_dgnss::UbloxDGNSSNode',
         name='ublox_dgnss',
-        namespace='base',
-        parameters=params_base
+        namespace='rover',
+        parameters=params_rover
       )
     ]
   )
@@ -79,13 +75,13 @@ def generate_launch_description():
       ComposableNode(
         package='ublox_nav_sat_fix_hp_node',
         plugin='ublox_nav_sat_fix_hp::UbloxNavSatHpFixNode',
-        namespace='base',
+        namespace='rover',
         name='ublox_nav_sat_fix_hp'
       )
     ]
   )
 
   return launch.LaunchDescription([
-    container_base,
+    container_rover,
     container_navsatfix,
     ])

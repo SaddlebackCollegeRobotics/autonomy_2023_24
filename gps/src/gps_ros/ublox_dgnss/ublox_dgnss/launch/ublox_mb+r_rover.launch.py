@@ -6,7 +6,7 @@ from launch_ros.descriptions import ComposableNode
 def generate_launch_description():
   """Generate launch description for ublox_dgnss components."""
   params_rover = [
-            {'DEVICE_SERIAL_STRING': "Test Rover"},
+            {'DEVICE_SERIAL_STRING': "GPS_001"},
             {'FRAME_ID': "rover"},
 
             # config measurement interval to 200 ms (ie 5 Hz) and nav update rate to once per measurement
