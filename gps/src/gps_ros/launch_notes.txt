@@ -1,2 +1,0 @@
-# Start up package
-ros2 launch ublox_dgnss ublox_rover_hpposllh_navsatfix.launch.py

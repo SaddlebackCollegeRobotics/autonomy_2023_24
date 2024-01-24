@@ -21,7 +21,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'gps_publisher = gps_driver.gps_publisher:main',
+            'heading_republisher = gps_driver.gps_heading:main',
         ],
     },
 )
