@@ -3,7 +3,8 @@ from rclpy.node import Node
 
 import numpy as np
 from geometry_msgs.msg import PoseStamped
-from ublox_dgnss.ublox_ubx_msgs.msg import UBXNavRelPosNED
+from ublox_ubx_msgs.msg import UBXNavRelPosNED
+from rclpy.qos import qos_profile_sensor_data
 
 class MinimalSubscriber(Node):
 
@@ -17,7 +18,7 @@ class MinimalSubscriber(Node):
             UBXNavRelPosNED,
             '/rover/ubx_nav_rel_pos_ned',
             self.listener_callback,
-            10)
+            qos_profile=qos_profile_sensor_data)
         self.subscription  # prevent unused variable warning
 
         self.publisher_ = self.create_publisher(PoseStamped, '/gps/heading', 10)
@@ -28,13 +29,13 @@ class MinimalSubscriber(Node):
     def listener_callback(self, heading_msg):
 
         if heading_msg.gnss_fix_ok and heading_msg.rel_pos_valid:
-            rel_pos_heading = heading_msg.data.rel_pos_heading
+            rel_pos_heading = heading_msg.rel_pos_heading
             
-            # Convert from 10^-5 degrees scientific notation
-            # Convert degrees to radians
-            rel_pos_heading = np.deg2rad(rel_pos_heading * 10**(-5))
+            # Convert from 10^-5 degrees scientific notation to standard notation.
+            standard_notation = rel_pos_heading * 10**(-5)
+            rel_pos_heading_rad = np.deg2rad(standard_notation)
 
-            heading_quaternion = self.get_quaternion_from_euler(0, 0, rel_pos_heading)
+            heading_quaternion = self.get_quaternion_from_euler(0, 0, rel_pos_heading_rad)
 
             self.pose_msg.header.stamp = self.get_clock().now().to_msg()
             self.pose_msg.header.frame_id = "gps_heading" # TODO - Rename this
@@ -46,6 +47,8 @@ class MinimalSubscriber(Node):
             # TODO - Add covariance info.
 
             self.publisher_.publish(self.pose_msg)
+
+            print("Heading: {:.2f}".format(standard_notation))
 
     # Author: AutomaticAddison.com
     def get_quaternion_from_euler(self, roll, pitch, yaw):
