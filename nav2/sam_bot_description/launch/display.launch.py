@@ -69,7 +69,7 @@ def generate_launch_description():
         # joint_state_publisher_gui_node,
         robot_state_publisher_node,
         ekf_filter_local_node,
-        ekf_filter_global_node,
+        # ekf_filter_global_node,
         navsat_transform_node,
         rviz_node
     ])
