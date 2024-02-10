@@ -7,7 +7,7 @@ def generate_launch_description():
   """Generate launch description for ublox_dgnss components."""
   params_rover = [
             {'DEVICE_SERIAL_STRING': "GPS_001"},
-            {'FRAME_ID': "moving_rover_gps"},
+            {'FRAME_ID': "gnss_moving_rover_link"},
 
             # config measurement interval to 200 ms (ie 5 Hz) and nav update rate to once per measurement
             {'CFG_RATE_MEAS': 0xc8},

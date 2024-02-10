@@ -14,13 +14,13 @@ class MinimalPublisher(Node):
     def __init__(self):
 
         # Give the node a name.
-        super().__init__('minimal_publisher')
+        super().__init__('rtcm_publisher')
 
         self.stream = Serial('/dev/ttyACM0', 460800, timeout=3)
         self.rtcm_reader = RTCMReader(self.stream)
 
         # Specify data type and topic name. Specify queue size (limit amount of queued messages)
-        self.publisher_ = self.create_publisher(ROS_RTCM_Message, '/gps/rtcm', 10)
+        self.publisher_ = self.create_publisher(ROS_RTCM_Message, '/base/gps/rtcm3', 10)
 
         # Create a timer that will call the 'timer_callback' function every timer_period second.
         timer_period = 1/5  # seconds

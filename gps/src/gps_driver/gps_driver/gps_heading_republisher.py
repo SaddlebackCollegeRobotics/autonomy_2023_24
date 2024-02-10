@@ -6,12 +6,17 @@ from geometry_msgs.msg import PoseStamped
 from ublox_ubx_msgs.msg import UBXNavRelPosNED
 from rclpy.qos import qos_profile_sensor_data
 
-class MinimalSubscriber(Node):
+class  MinimalSubscriber(Node):
 
     def __init__(self):
 
         # Give the node a name.
-        super().__init__('minimal_subscriber')
+        super().__init__('heading_republisher')
+
+        # Offset is in degrees.
+        # This is the offset between the GPS antennas and 
+        # the forward direction of the vehicle.
+        self.HEADING_OFFSET = 32.2794 
 
         # Subscribe to the topic 'topic'. Callback gets called when a message is received.
         self.subscription = self.create_subscription(
@@ -33,6 +38,7 @@ class MinimalSubscriber(Node):
             
             # Convert from 10^-5 degrees scientific notation to standard notation.
             standard_notation = rel_pos_heading * 10**(-5)
+            standard_notation = standard_notation + self.HEADING_OFFSET
             rel_pos_heading_rad = np.deg2rad(standard_notation)
 
             heading_quaternion = self.get_quaternion_from_euler(0, 0, rel_pos_heading_rad)

@@ -15,7 +15,8 @@
     <xacro:property name="wheel_ygap" value="0.100"/>
     <xacro:property name="wheel_zoff" value="0.145"/>
     <xacro:property name="wheel_xoff" value="0.420"/>
-
+    93.6 cm / 2  = 46.8 cm
+    46.8 cm - 12.7 cm = 34.1 cm
     <!-- ZED Camera -->
     <xacro:property name="zed_width" value="0.180"/>
     <xacro:property name="zed_length" value="0.043"/>
@@ -24,6 +25,15 @@
     <!-- LIDAR -->
     <xacro:property name="lidar_radius" value="0.039"/>
     <xacro:property name="lidar_height" value="0.040"/>
+
+    <!-- GNSS Moving Base Antenna -->
+    <xacro:property name="gnss_moving_base_radius" value="0.052"/>
+    <xacro:property name="gnss_moving_base_height" value="0.045"/>
+
+    <!-- GNSS Moving Rover Antenna -->
+    <xacro:property name="gnss_moving_rover_radius" value="0.052"/>
+    <xacro:property name="gnss_moving_rover_height" value="0.045"/>
+
     
 
     <!-- Robot Base -->
@@ -76,26 +86,6 @@
         <origin xyz="0.0 0.0 ${-(wheel_radius+wheel_zoff)}" rpy="0 0 0"/>
     </joint>
 
-    <!-- Robot IMU -->
-    <!-- <link name="imu_link"> -->
-        <!-- <visual> -->
-            <!-- <geometry> -->
-                <!-- <box size="0.1 0.1 0.1"/> -->
-            <!-- </geometry> -->
-        <!-- </visual> -->
-    <!-- <collision>
-    <geometry>
-        <box size="0.1 0.1 0.1"/>
-    </geometry>
-    </collision> -->
-    <!-- </link> -->
-
-    <!-- <joint name="imu_joint" type="fixed"> -->
-        <!-- <parent link="base_link"/> -->
-        <!-- <child link="imu_link"/> -->
-        <!-- <origin xyz="0 0 0.01"/> -->
-    <!-- </joint> -->
-
     <!-- Robot LIDAR -->
     <link name="lidar_link">
         <visual>
@@ -126,6 +116,38 @@
         <parent link="base_link"/>
         <child link="zed_camera_link"/>
         <origin xyz="${(base_length / 2) - (zed_length / 2)} 0 ${(base_height / 2) + (zed_height / 2)}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- GNSS Moving Base Antenna -->
+    <link name="gnss_moving_base_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${gnss_moving_base_radius}" length="${gnss_moving_base_height}"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="gnss_moving_base_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="gnss_moving_base_link"/>
+        <origin xyz="${0.127 - (base_length / 2)} ${0.0251 - (base_width / 2)} ${(base_height / 2) + (gnss_moving_base_height / 2)}" rpy="0 0 0"/>
+    </joint>
+
+     <!-- GNSS Moving Rover Antenna -->
+    <link name="gnss_moving_rover_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="${gnss_moving_rover_radius}" length="${gnss_moving_rover_height}"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="gnss_moving_rover_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="gnss_moving_rover_link"/>
+        <origin xyz="${(base_length / 2) - 0.127} ${(base_width / 2) - 0.0251} ${(base_height / 2) + (gnss_moving_rover_height / 2)}" rpy="0 0 0"/>
     </joint>
 
 </robot>

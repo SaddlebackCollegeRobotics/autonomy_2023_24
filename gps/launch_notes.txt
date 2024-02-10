@@ -1,0 +1,5 @@
+# Start static base
+ros2 run gps_driver rtcm_publisher
+
+# Launch the 
+ros2 launch rover_gps.launch.py

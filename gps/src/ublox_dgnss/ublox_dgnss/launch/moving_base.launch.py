@@ -7,7 +7,7 @@ def generate_launch_description():
   """Generate launch description for ublox_dgnss components."""
   params_base= [
             {'DEVICE_SERIAL_STRING': "GPS_000"},
-            {'FRAME_ID': "moving_base_gps"},
+            {'FRAME_ID': "gnss_moving_base_link"},
 
             # config measurement interval to 200 ms (ie 5 Hz) and nav update rate to once per measurement
             {'CFG_RATE_MEAS': 0xc8},
@@ -65,7 +65,10 @@ def generate_launch_description():
         plugin='ublox_dgnss::UbloxDGNSSNode',
         name='ublox_dgnss',
         namespace='base',
-        parameters=params_base
+        parameters=params_base,
+        remappings=[
+            ('/ntrip_client/rtcm', '/base/gps/rtcm3'),
+        ]
       )
     ]
   )
