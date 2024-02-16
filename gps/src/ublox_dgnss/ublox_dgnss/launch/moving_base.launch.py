@@ -56,7 +56,7 @@ def generate_launch_description():
 
   container_base = ComposableNodeContainer(
     name='ublox_dgnss_moving_base',
-    namespace='',
+    namespace='base',
     package='rclcpp_components',
     executable='component_container_mt',
     composable_node_descriptions=[
@@ -75,7 +75,7 @@ def generate_launch_description():
 
   container_navsatfix = ComposableNodeContainer(
     name='ublox_nav_sat_fix_hp_container',
-    namespace='',
+    namespace='base',
     package='rclcpp_components',
     executable='component_container_mt',
     composable_node_descriptions=[

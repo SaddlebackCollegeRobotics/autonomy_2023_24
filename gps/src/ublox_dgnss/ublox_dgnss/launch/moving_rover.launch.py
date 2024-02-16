@@ -52,7 +52,7 @@ def generate_launch_description():
 
   container_rover = ComposableNodeContainer(
     name='ublox_dgnss_rover',
-    namespace='',
+    namespace='rover',
     package='rclcpp_components',
     executable='component_container_mt',
     composable_node_descriptions=[
@@ -68,7 +68,7 @@ def generate_launch_description():
 
   container_navsatfix = ComposableNodeContainer(
     name='ublox_nav_sat_fix_hp_container',
-    namespace='',
+    namespace='rover',
     package='rclcpp_components',
     executable='component_container_mt',
     composable_node_descriptions=[

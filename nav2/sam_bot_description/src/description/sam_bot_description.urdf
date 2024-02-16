@@ -15,8 +15,7 @@
     <xacro:property name="wheel_ygap" value="0.100"/>
     <xacro:property name="wheel_zoff" value="0.145"/>
     <xacro:property name="wheel_xoff" value="0.420"/>
-    93.6 cm / 2  = 46.8 cm
-    46.8 cm - 12.7 cm = 34.1 cm
+
     <!-- ZED Camera -->
     <xacro:property name="zed_width" value="0.180"/>
     <xacro:property name="zed_length" value="0.043"/>
@@ -131,7 +130,7 @@
     <joint name="gnss_moving_base_joint" type="fixed">
         <parent link="base_link"/>
         <child link="gnss_moving_base_link"/>
-        <origin xyz="${0.127 - (base_length / 2)} ${0.0251 - (base_width / 2)} ${(base_height / 2) + (gnss_moving_base_height / 2)}" rpy="0 0 0"/>
+        <origin xyz="${0.127 - (base_length / 2)} ${0.057 - (base_width / 2)} ${(base_height / 2) + (gnss_moving_base_height / 2)}" rpy="0 0 0"/>
     </joint>
 
      <!-- GNSS Moving Rover Antenna -->
@@ -149,5 +148,21 @@
         <child link="gnss_moving_rover_link"/>
         <origin xyz="${(base_length / 2) - 0.127} ${(base_width / 2) - 0.0251} ${(base_height / 2) + (gnss_moving_rover_height / 2)}" rpy="0 0 0"/>
     </joint>
+
+    <!-- GNSS Moving Rover Antenna
+    <link name="map">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <cylinder radius="0.5" length="0.5"/>
+            </geometry>
+        </visual>
+    </link>
+
+    <joint name="map_joint" type="floating">
+        <parent link="base_link"/>
+        <child link="map"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint> -->
 
 </robot>

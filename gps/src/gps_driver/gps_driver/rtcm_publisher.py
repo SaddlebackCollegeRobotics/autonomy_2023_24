@@ -16,7 +16,8 @@ class MinimalPublisher(Node):
         # Give the node a name.
         super().__init__('rtcm_publisher')
 
-        self.stream = Serial('/dev/ttyACM0', 460800, timeout=3)
+        self.stream = None
+        self.stream = Serial('/dev/ttyACM2', 460800, timeout=3)
         self.rtcm_reader = RTCMReader(self.stream)
 
         # Specify data type and topic name. Specify queue size (limit amount of queued messages)
@@ -27,7 +28,8 @@ class MinimalPublisher(Node):
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def __del__(self):
-        self.stream.close()
+        if self.stream != None:
+            self.stream.close()
 
     def timer_callback(self):
         

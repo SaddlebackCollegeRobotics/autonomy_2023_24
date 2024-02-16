@@ -30,28 +30,33 @@ def generate_launch_description():
         executable='rviz2',
         name='rviz2',
         output='screen',
-        arguments=['-d', LaunchConfiguration('rvizconfig')],
+        arguments=['-d', [os.path.join(pkg_share, 'rviz', 'urdf_config.rviz')]]
     )
     ekf_filter_local_node = launch_ros.actions.Node(
        package='robot_localization',
        executable='ekf_node',
        name='ekf_filter_local_node',
        output='screen',
-       parameters=[os.path.join(pkg_share, 'config/ekf3.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+       parameters=[os.path.join(pkg_share, 'config/ekf3.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}],
+       remappings=[('/odometry/filtered', '/odometry/filtered_local')]
     )
     ekf_filter_global_node = launch_ros.actions.Node(
        package='robot_localization',
        executable='ekf_node',
        name='ekf_filter_global_node',
        output='screen',
-       parameters=[os.path.join(pkg_share, 'config/ekf3.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}]
+       parameters=[os.path.join(pkg_share, 'config/ekf3.yaml'), {'use_sim_time': LaunchConfiguration('use_sim_time')}],
+       remappings=[('/odometry/filtered', '/odometry/filtered_global')]
+
     )
     navsat_transform_node = launch_ros.actions.Node(
         package='robot_localization',
         executable='navsat_transform_node',
         name='navsat_transform_node',
         output='screen',
-        parameters=[os.path.join(pkg_share, 'config/ekf3.yaml')]
+        parameters=[os.path.join(pkg_share, 'config/ekf3.yaml')],
+        remappings=[('/gps/fix', '/base/fix'),
+                    ('/odometry/filtered', '/odometry/filtered_local')]
     )
 
 
@@ -68,8 +73,8 @@ def generate_launch_description():
         joint_state_publisher_node,
         # joint_state_publisher_gui_node,
         robot_state_publisher_node,
-        # ekf_filter_local_node,
         ekf_filter_global_node,
+        ekf_filter_local_node,
         navsat_transform_node,
         rviz_node
     ])

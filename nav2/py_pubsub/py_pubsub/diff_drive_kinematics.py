@@ -47,4 +47,4 @@ def diff_drive_fk(left_vel: float, right_vel: float, radius: float, separation: 
     :param separation: wheel separation [m]
     :returns: linear velocity [m/s], angular velocity [rad/s]
     """
-    return (right_vel+left_vel) / 2, (right_vel-left_vel) / separation 
+    return radius * (right_vel + left_vel) / 2, radius * (right_vel-left_vel) / separation 
