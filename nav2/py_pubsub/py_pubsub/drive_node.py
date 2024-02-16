@@ -1,4 +1,5 @@
 from typing import NamedTuple
+from math import pi
 
 import rclpy
 from rclpy.node import Node
@@ -54,7 +55,10 @@ class RobotNode(Node):
         left_side_est, right_side_est = side_est.data
 
         linear_vel_x, angular_vel_z = diff_drive_fk(
-            left_side_est, right_side_est, self.radius, self.separation
+            2 * pi * left_side_est, 
+            2 * pi * right_side_est, 
+            self.radius, 
+            self.separation
         )
 
         twist_msg = Twist()
