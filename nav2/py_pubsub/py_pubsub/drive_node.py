@@ -2,8 +2,8 @@ from typing import NamedTuple
 
 import rclpy
 from rclpy.node import Node
-from geometry_msgs.msg import Twist, Vector3
-from std_msgs.msg import Float64MultiArray
+from geometry_msgs.msg import Twist, TwistWithCovarianceStamped
+from std_msgs.msg import Float64MultiArray, Header
 
 from .diff_drive_kinematics import diff_drive_ik, diff_drive_fk, rpm_to_rad
 
@@ -46,22 +46,30 @@ class RobotNode(Node):
         self._wheel_vel_pub = self.create_publisher(
             Float64MultiArray, '/control/drive_control_input', 10)
         self._wheel_odometry_feedback = self.create_publisher(
-            Twist, '/odometry/wheel_feedback', 10)
+            TwistWithCovarianceStamped, '/odometry/wheel_feedback', 10)
 
         print('ready!')
 
-    def calc_drive_fk(self, wheel_est: Float64MultiArray) -> None:
-        left_wheel_est, right_wheel_est = list(wheel_est)
+    def calc_drive_fk(self, side_est: Float64MultiArray) -> None:
+        left_side_est, right_side_est = side_est.data
 
         linear_vel_x, angular_vel_z = diff_drive_fk(
-            left_wheel_est, right_wheel_est, self.radius, self.separation
+            left_side_est, right_side_est, self.radius, self.separation
         )
 
         twist_msg = Twist()
+        msg_header = Header()
         twist_msg.linear.x = linear_vel_x
         twist_msg.angular.z = angular_vel_z
+        msg_header.stamp = self.get_clock().now().to_msg()
+        msg_header.frame_id = "drive_vel_link"
 
-        self._wheel_odometry_feedback.publish(twist_msg)
+        twist_msg_with_covariance = TwistWithCovarianceStamped(
+            twist=twist_msg, header=msg_header
+        )
+        twist_msg_with_covariance.covariance[0] = -1 # Disable covariance
+
+        self._wheel_odometry_feedback.publish(twist_msg_with_covariance)
 
     def run_motors(self, twist_msg) -> None:
         # transform linear and angular commands into percents of wheel speeds
