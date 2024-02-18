@@ -56,7 +56,7 @@ def generate_launch_description():
         output='screen',
         parameters=[os.path.join(pkg_share, 'config/ekf3.yaml')],
         remappings=[('/gps/fix', '/base/fix'),
-                    ('/odometry/filtered', '/odometry/filtered_local')]
+                    ('/odometry/filtered', '/odometry/filtered_global')]
     )
 
 
@@ -70,8 +70,8 @@ def generate_launch_description():
         launch.actions.DeclareLaunchArgument(name='use_sim_time', default_value='False',
                                             description='Flag to enable use_sim_time'),
 
-        joint_state_publisher_node,
-        # joint_state_publisher_gui_node,
+        # joint_state_publisher_node,
+        joint_state_publisher_gui_node,
         robot_state_publisher_node,
         ekf_filter_global_node,
         ekf_filter_local_node,

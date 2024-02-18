@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = 'py_pubsub'
+package_name = 'zed_driver'
 
 setup(
     name=package_name,
@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'twist_to_vel = py_pubsub.drive_node:main',
+            'talker = zed_driver.publisher_member_function:main',
+            'republisher = zed_driver.subscriber_member_function:main',
         ],
     },
 )

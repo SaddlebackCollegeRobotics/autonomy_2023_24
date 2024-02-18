@@ -49,7 +49,7 @@
 
 
     <!-- Robot Wheels -->
-    <!-- <xacro:macro name="wheel" params="prefix x_reflect y_reflect">
+    <xacro:macro name="wheel" params="prefix x_reflect y_reflect">
         <link name="${prefix}_link">
         <visual>
             <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
@@ -73,7 +73,7 @@
     <xacro:wheel prefix="drivewhl_bl" x_reflect="-1" y_reflect="1" />
     <xacro:wheel prefix="drivewhl_br" x_reflect="-1" y_reflect="-1" />
     <xacro:wheel prefix="drivewhl_fl" x_reflect="1" y_reflect="1" />
-    <xacro:wheel prefix="drivewhl_fr" x_reflect="1" y_reflect="-1" /> -->
+    <xacro:wheel prefix="drivewhl_fr" x_reflect="1" y_reflect="-1" />
 
 
     <!-- Robot Footprint -->
@@ -148,21 +148,5 @@
         <child link="gnss_moving_rover_link"/>
         <origin xyz="${(base_length / 2) - 0.127} ${(base_width / 2) - 0.0251} ${(base_height / 2) + (gnss_moving_rover_height / 2)}" rpy="0 0 0"/>
     </joint>
-
-    <!-- GNSS Moving Rover Antenna
-    <link name="map">
-        <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
-            <geometry>
-                <cylinder radius="0.5" length="0.5"/>
-            </geometry>
-        </visual>
-    </link>
-
-    <joint name="map_joint" type="floating">
-        <parent link="base_link"/>
-        <child link="map"/>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-    </joint> -->
 
 </robot>
