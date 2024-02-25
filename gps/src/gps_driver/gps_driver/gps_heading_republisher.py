@@ -16,7 +16,7 @@ class  MinimalSubscriber(Node):
         # Offset is in degrees.
         # This is the offset between the GPS antennas and 
         # the forward direction of the vehicle.
-        self.HEADING_OFFSET = 30.3233 
+        self.HEADING_OFFSET = 32.27943715 
 
         # Subscribe to the topic 'topic'. Callback gets called when a message is received.
         self.subscription = self.create_subscription(
@@ -44,7 +44,7 @@ class  MinimalSubscriber(Node):
             heading_quaternion = self.get_quaternion_from_euler(0, 0, rel_pos_heading_rad)
 
             self.pose_msg.header.stamp = self.get_clock().now().to_msg()
-            self.pose_msg.header.frame_id = "gps_heading" # TODO - Rename this
+            self.pose_msg.header.frame_id = "map"
             self.pose_msg.pose.orientation.x = heading_quaternion[0]
             self.pose_msg.pose.orientation.y = heading_quaternion[1]
             self.pose_msg.pose.orientation.z = heading_quaternion[2]

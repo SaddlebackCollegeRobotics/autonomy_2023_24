@@ -59,6 +59,31 @@ def generate_launch_description():
                     ('/odometry/filtered', '/odometry/filtered_global')]
     )
 
+    wgs84_transformer_node = launch_ros.actions.Node(
+              package="swri_transform_util",
+              executable="initialize_origin.py",
+              name="initialize_origin",
+              parameters=[
+                  {"local_xy_frame": "map"},
+                  {"local_xy_origin": "origin"},
+                  {
+                      "local_xy_origins": [
+                          33.553553,
+                          -117.664120,
+                          0.0,
+                          0.0,
+                      ]
+                  },
+                  {"use_sim_time": False},
+              ],
+          )
+    
+    mapviz = launch_ros.actions.Node(
+              package="mapviz",
+              executable="mapviz",
+              name="mapviz_node",
+          )
+
 
     return launch.LaunchDescription([
         launch.actions.DeclareLaunchArgument(name='gui', default_value='True',
@@ -76,5 +101,7 @@ def generate_launch_description():
         ekf_filter_global_node,
         ekf_filter_local_node,
         navsat_transform_node,
+        wgs84_transformer_node,
+        mapviz,
         rviz_node
     ])

@@ -1,0 +1,59 @@
+capture_directory: "~"
+fixed_frame: map
+target_frame: base_link
+fix_orientation: false
+rotate_90: false
+enable_antialiasing: true
+show_displays: true
+show_status_bar: true
+show_capture_tools: true
+window_width: 1387
+window_height: 752
+view_scale: 0.0636431128
+offset_x: -5.57245684
+offset_y: -2.40276456
+use_latest_transforms: true
+background: "#a0a0a4"
+image_transport: raw
+displays:
+  - type: mapviz_plugins/tile_map
+    name: new display
+    config:
+      visible: true
+      collapsed: false
+      custom_sources:
+        - base_url: http://localhost:8080/wmts/gm_layer/gm_grid/{level}/{x}/{y}.png
+          max_zoom: 19
+          name: gmapping
+          type: wmts
+      bing_api_key: ""
+      source: gmapping
+  - type: mapviz_plugins/point_click_publisher
+    name: new display
+    config:
+      visible: true
+      collapsed: false
+      topic: clicked_point
+      output_frame: map
+  - type: mapviz_plugins/tf_frame
+    name: new display
+    config:
+      visible: true
+      collapsed: false
+      frame: base_link
+      color: "#00ff00"
+      draw_style: arrows
+      position_tolerance: 0
+      buffer_size: 1
+      static_arrow_sizes: true
+      arrow_size: 53
+  - type: mapviz_plugins/navsat
+    name: new display
+    config:
+      visible: true
+      collapsed: false
+      topic: /base/fix
+      color: "#55aaff"
+      draw_style: points
+      position_tolerance: 0
+      buffer_size: 1

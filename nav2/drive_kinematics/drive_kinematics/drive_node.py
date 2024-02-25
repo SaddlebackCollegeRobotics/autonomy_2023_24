@@ -112,7 +112,7 @@ def main(args=None):
     # TODO: Ensure correctness of measured values
     robot_info = DiffDriveInfo(
         wheel_rad=0.174,  # [m]
-        wheel_sep=0.785,  # [m]
+        wheel_sep=0.814, # 0.785,  # [m]
         max_wheel_speed=rpm_to_rad(4200.0) # [rad/s]
     )  
 
