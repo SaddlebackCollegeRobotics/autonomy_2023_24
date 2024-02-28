@@ -42,9 +42,16 @@ def generate_launch_description():
         executable='heading_republisher',
     )
 
+    gps_qos_republisher = Node(
+        package='gps_driver',
+        executable='gps_republisher',
+    )
+
+
     return LaunchDescription([
       moving_base,
       moving_rover,
       heading_republisher,
+      gps_qos_republisher,
    ])
 

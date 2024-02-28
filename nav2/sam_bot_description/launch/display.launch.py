@@ -55,7 +55,7 @@ def generate_launch_description():
         name='navsat_transform_node',
         output='screen',
         parameters=[os.path.join(pkg_share, 'config/ekf3.yaml')],
-        remappings=[('/gps/fix', '/base/fix'),
+        remappings=[('/gps/fix', '/base/fix_qos_sensor'),
                     ('/odometry/filtered', '/odometry/filtered_global')]
     )
 
@@ -65,15 +65,17 @@ def generate_launch_description():
               name="initialize_origin",
               parameters=[
                   {"local_xy_frame": "map"},
-                  {"local_xy_origin": "origin"},
-                  {
-                      "local_xy_origins": [
-                          33.553553,
-                          -117.664120,
-                          0.0,
-                          0.0,
-                      ]
-                  },
+                  {"local_xy_origin": "auto"},
+                  {"local_xy_navsatfix_topic": "/base/fix_qos_reliable"},
+                  {'local_xy_gpsfix_topic': '/local_xy_gpsfix_topic'},
+                #   {
+                #       "local_xy_origins": [
+                #           33.55343555,
+                #           -117.663964169,
+                #           0.0,
+                #           0.0,
+                #       ]
+                #   },
                   {"use_sim_time": False},
               ],
           )
@@ -96,12 +98,13 @@ def generate_launch_description():
                                             description='Flag to enable use_sim_time'),
 
         # joint_state_publisher_node,
-        joint_state_publisher_gui_node,
+        
+        wgs84_transformer_node,
+        # joint_state_publisher_gui_node,
         robot_state_publisher_node,
         ekf_filter_global_node,
         ekf_filter_local_node,
         navsat_transform_node,
-        wgs84_transformer_node,
         mapviz,
         rviz_node
     ])

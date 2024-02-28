@@ -1,8 +1,4 @@
 
-
-
-
-
 # TODO - This will be used for fixing the tf tree issue for navsat_transform_node
 
 # Test:
@@ -40,7 +36,7 @@ class MinimalSubscriber(Node):
     # This callback definition simply prints an info message to the console, along with the data it received. 
     def listener_callback(self, msg):
         msg.header.frame_id = "map"
-        # msg.child_frame_id = "zed_camera_link"
+        msg.child_frame_id = "zed_camera_link"
         self.publisher_.publish(msg)
 
 def main(args=None):
