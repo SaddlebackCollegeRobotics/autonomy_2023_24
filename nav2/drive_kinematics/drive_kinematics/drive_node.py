@@ -38,14 +38,15 @@ class RobotNode(Node):
                                                   self.max_wheel_speed*fraction,
                                                   self.radius,
                                                   self.separation)
-
+        
+        print(f'{self.max_linear_speed=}, {self.max_angular_speed=}')
         self.create_subscription(
             Twist, '/cmd_vel', self.run_motors, 10)
         self.create_subscription(
             Float64MultiArray, '/drive/wheel_velocity_estimates', self.calc_drive_fk, 10)
 
         self._wheel_vel_pub = self.create_publisher(
-            Float64MultiArray, '/control/drive_control_input', 10)
+            Float64MultiArray, '/drive/control_input', 10)
         self._wheel_odometry_feedback = self.create_publisher(
             TwistWithCovarianceStamped, '/odometry/wheel_feedback', 10)
 
@@ -77,13 +78,13 @@ class RobotNode(Node):
 
     def run_motors(self, twist_msg) -> None:
         # transform linear and angular commands into percents of wheel speeds
-        linear = twist_msg.linear.x * self.max_linear_speed  
-        angular = twist_msg.angular.z * self.max_angular_speed 
+        linear = twist_msg.linear.x #* self.max_linear_speed  
+        angular = twist_msg.angular.z #* self.max_angular_speed 
         left_wheel_vel, right_wheel_vel = diff_drive_ik(
             linear, -angular, self.radius, self.separation)
 
-        left_percent_max_speed = left_wheel_vel / self.max_wheel_speed * 100
-        right_percent_max_speed = right_wheel_vel / self.max_wheel_speed * 100
+        # left_percent_max_speed = left_wheel_vel / self.max_wheel_speed * 100
+        # right_percent_max_speed = right_wheel_vel / self.max_wheel_speed * 100
 
         left_vel = left_percent_max_speed / 100
         right_vel = right_percent_max_speed / 100
@@ -113,9 +114,9 @@ def main(args=None):
     robot_info = DiffDriveInfo(
         wheel_rad=0.174,  # [m]
         wheel_sep=0.814, # 0.785,  # [m]
-        max_wheel_speed=rpm_to_rad(4200.0) # [rad/s]
+        max_wheel_speed=rpm_to_rad(30.0 * 60 / 80) # [rad/s]
     )  
-
+    print(rpm_to_rad(30.0 * 60))
     rclpy.init(args=args)
 
     node = RobotNode(robot_info)
