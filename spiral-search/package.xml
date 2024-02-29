@@ -4,6 +4,7 @@
   <name>spiral</name>
   <version>0.15.1</version>
   <description>Makes the robot move in a spiral.</description>
+  <maintainer email="supernovawarriors128@gmail.com">cameron</maintainer>
   <license>Apache License 2.0</license>
   
 
