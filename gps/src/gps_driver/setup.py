@@ -23,7 +23,7 @@ setup(
         'console_scripts': [
             'heading_republisher = gps_driver.gps_heading_republisher:main',
             'rtcm_publisher = gps_driver.rtcm_publisher:main',
-            'gps_republisher = gps_driver.gps_qos_republisher:main'
+            'gps_republisher = gps_driver.gps_fix_republisher:main'
         ],
     },
 )

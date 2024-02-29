@@ -97,7 +97,7 @@ ekf_filter_global_node:
                     false, false, false,
                     false, false, false]
     odom0_relative: false
-    odom0_differential: false
+    odom0_differential: true
     odom0_queue_size: 10
 
     # twist0: /odometry/wheel_feedback
@@ -120,7 +120,7 @@ ekf_filter_global_node:
     odom1_differential: false
     odom1_relative: false
 
-    pose0: /odometry/gps_heading
+    pose0: /gps/heading
     pose0_config: [false,  false,  false,
                   false, false, true,
                   false, false, false,

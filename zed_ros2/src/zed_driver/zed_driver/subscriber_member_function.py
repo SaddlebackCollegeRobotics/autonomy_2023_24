@@ -29,7 +29,7 @@ class MinimalSubscriber(Node):
             10)
         self.subscription  # prevent unused variable warning
 
-        self.publisher_ = self.create_publisher(Odometry, '/zed/custom/odom_republisher', 10)
+        self.publisher_ = self.create_publisher(Odometry, '/zed_odom_republisher', 10)
 
 
 
