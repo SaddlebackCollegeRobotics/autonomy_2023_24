@@ -14,3 +14,8 @@ ros2 launch nav2_bringup navigation_launch.py params_file:='config/nav2_config4.
 
 sudo docker run -p 8080:8080 -d -t -v ~/mapproxy:/mapproxy danielsnider/mapproxy
 
+
+# Set goal
+
+ros2 topic pub /goal_pose geometry_msgs/PoseStamped "{header: {stamp: {sec: 0}, frame_id: 'map'}, pose: {position: {x: 3, y: 0.0, z: 0.0}, orientation: {w: 1.0}}}"
+

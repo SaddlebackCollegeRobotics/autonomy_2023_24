@@ -45,7 +45,7 @@ class RobotNode(Node):
             Float64MultiArray, '/drive/wheel_velocity_estimates', self.calc_drive_fk, 10)
 
         self._wheel_vel_pub = self.create_publisher(
-            Float64MultiArray, '/control/drive_control_input', 10)
+            Float64MultiArray, '/drive/control_input', 10)
         self._wheel_odometry_feedback = self.create_publisher(
             TwistWithCovarianceStamped, '/odometry/wheel_feedback', 10)
 
@@ -85,8 +85,8 @@ class RobotNode(Node):
         left_percent_max_speed = left_wheel_vel / self.max_wheel_speed * 100
         right_percent_max_speed = right_wheel_vel / self.max_wheel_speed * 100
 
-        left_vel = left_percent_max_speed / 100
-        right_vel = right_percent_max_speed / 100
+        left_vel = left_percent_max_speed
+        right_vel = right_percent_max_speed
 
         # # command motors to spin with set percent of max speed
         # self.motors.start(-left_percent_max_speed, right_percent_max_speed)
