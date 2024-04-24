@@ -39,7 +39,7 @@ def generate_launch_description():
         gps_fix,
         gps_fix_republisher,
         gps_heading,
-        # lidar,
+        lidar,
         zed_odometry,
         zed_odom_republisher,
     ])

@@ -86,8 +86,8 @@ class RobotNode(Node):
         # left_percent_max_speed = left_wheel_vel / self.max_wheel_speed * 100
         # right_percent_max_speed = right_wheel_vel / self.max_wheel_speed * 100
 
-        left_vel = left_percent_max_speed / 100
-        right_vel = right_percent_max_speed / 100
+        left_vel = left_percent_max_speed
+        right_vel = right_percent_max_speed
 
         # # command motors to spin with set percent of max speed
         # self.motors.start(-left_percent_max_speed, right_percent_max_speed)

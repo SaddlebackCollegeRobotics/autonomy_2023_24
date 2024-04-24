@@ -1,17 +1,16 @@
-import rclpy
 from rclpy.node import Node
-
-import numpy as np
 from sensor_msgs.msg import NavSatFix
 from rclpy.qos import qos_profile_sensor_data
+import rclpy
 
-class  MinimalSubscriber(Node):
+class MinimalSubscriber(Node):
 
     def __init__(self):
 
         # Give the node a name.
-        super().__init__('gps_qos_republisher')
+        super().__init__('gps_fix_republisher')
 
+        # Subscribe to the topic 'topic'. Callback gets called when a message is received.
         self.subscription = self.create_subscription(
             NavSatFix,
             '/base/fix',
@@ -19,10 +18,18 @@ class  MinimalSubscriber(Node):
             qos_profile=qos_profile_sensor_data)
         self.subscription  # prevent unused variable warning
 
-        self.publisher_ = self.create_publisher(NavSatFix, '/base/fix_qos', 10)
+        self.pub_qos_sensor = self.create_publisher(NavSatFix, '/base/fix_qos_sensor', qos_profile=qos_profile_sensor_data)
+        self.pub_qos_reliable = self.create_publisher(NavSatFix, '/base/fix_qos_reliable', 10)
 
+
+    # This callback definition simply prints an info message to the console, along with the data it received. 
     def listener_callback(self, msg):
-        self.publisher_.publish(msg)
+
+        msg.header.frame_id = "gnss_moving_base_link"
+        
+        self.pub_qos_sensor.publish(msg)
+        self.pub_qos_reliable.publish(msg)
+
 
 def main(args=None):
     rclpy.init(args=args)

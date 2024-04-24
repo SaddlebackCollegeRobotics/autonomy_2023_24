@@ -16,7 +16,8 @@ class  MinimalSubscriber(Node):
         # Offset is in degrees.
         # This is the offset between the GPS antennas and 
         # the forward direction of the vehicle.
-        self.HEADING_OFFSET = 32.27943715 
+        # self.HEADING_OFFSET = -32.27943715 
+        self.HEADING_OFFSET = 0
 
         # Subscribe to the topic 'topic'. Callback gets called when a message is received.
         self.subscription = self.create_subscription(

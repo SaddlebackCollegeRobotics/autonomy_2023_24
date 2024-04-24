@@ -43,6 +43,6 @@ def generate_launch_description():
 
     return LaunchDescription([
       zed_wrapper,
-    #   zed_odom_republisher,
+      zed_odom_republisher,
    ])
 

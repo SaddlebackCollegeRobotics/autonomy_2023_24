@@ -1,0 +1,16 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/cameron/workspaces/autonomy_2023_24/zed_ros2/install/zed_interfaces/local/lib/python3.10/dist-packages",
+        "/home/cameron/workspaces/autonomy_2023_24/zed_ros2/install/zed_driver/lib/python3.10/site-packages",
+        "/home/cameron/workspaces/autonomy_2023_24/rosbags/install/republisher/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/cameron/workspaces/autonomy_2023_24/zed_ros2/install/zed_interfaces/local/lib/python3.10/dist-packages",
+        "/home/cameron/workspaces/autonomy_2023_24/zed_ros2/install/zed_driver/lib/python3.10/site-packages",
+        "/home/cameron/workspaces/autonomy_2023_24/rosbags/install/republisher/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages"
+    ]
+}

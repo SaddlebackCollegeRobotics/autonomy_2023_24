@@ -152,7 +152,7 @@ local_costmap:
       width: 3
       height: 3
       resolution: 0.05
-      robot_radius: 0.22
+      robot_radius: 0.75
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
@@ -179,7 +179,7 @@ local_costmap:
           obstacle_max_range: 2.5
           obstacle_min_range: 0.0
         pointcloud:
-          topic: /zed/zed_node/point_cloud/cloud_registered
+          topic: /bruh/zed/zed_node/point_cloud/cloud_registered
           data_type: "PointCloud2"
           max_obstacle_height: 2.0
           clearing: True
@@ -199,7 +199,7 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
-      robot_radius: 0.22
+      robot_radius: 0.75
       resolution: 0.1
       # When using GPS navigation you will potentially traverse huge environments which are not practical to
       # fit on a big static costmap. Thus it is recommended to use a rolling global costmap large enough to 
@@ -227,7 +227,7 @@ global_costmap:
           # outdoors there will probably be more inf points
           inf_is_valid: true
         pointcloud:
-          topic: /zed/zed_node/point_cloud/cloud_registered
+          topic: /bruh/zed/zed_node/point_cloud/cloud_registered
           data_type: "PointCloud2"
           max_obstacle_height: 2.0
           clearing: True
