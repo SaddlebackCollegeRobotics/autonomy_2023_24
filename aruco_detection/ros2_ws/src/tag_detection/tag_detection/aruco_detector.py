@@ -46,9 +46,11 @@ class Aruco_Detector():
         self.is_stereo = is_stereo
 
         # load calibration data from numpy file
-        with np.load(f'{data_folder}/{calibration_data}') as X:
-            self.mtx, self.dist, _ , _ = [X[i] for i in ('mtx','dist','rvecs','tvecs')]
+        # with np.load(f'{data_folder}/{calibration_data}') as X:
+        temp_path = "/home/scrobotics/workspaces/autonomy_2023_24/aruco_detection/ros2_ws/src/tag_detection/tag_detection/data/logitech_webcam_data.npz"
 
+        with np.load(temp_path) as X:
+            self.mtx, self.dist, _ , _ = [X[i] for i in ('mtx','dist','rvecs','tvecs')]
         # define aruco tagdictionary, tag detection parameters, 
         # and video capture feed for tag detection
         self.dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
@@ -132,5 +134,4 @@ class Aruco_Detector():
         
     def __del__(self):
         # release all resources
-        self.cap.release()
         cv2.destroyAllWindows()
