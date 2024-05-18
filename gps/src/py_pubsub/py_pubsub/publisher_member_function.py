@@ -1,8 +1,16 @@
 import rclpy
 from rclpy.node import Node
+from serial import Serial, SerialException
+from crc import Calculator, Crc32
+# pip3 install crc
+from rclpy.qos import qos_profile_sensor_data
 
-# Import the String message type. (Other types are available in the same way.)
-from std_msgs.msg import String
+from sensor_msgs.msg import NavSatFix
+from geometry_msgs.msg import PoseWithCovarianceStamped
+from rtcm_msgs.msg import Message as RTCMMessage
+
+import numpy as np
+
 
 class MinimalPublisher(Node):
 
@@ -11,25 +19,134 @@ class MinimalPublisher(Node):
         # Give the node a name.
         super().__init__('minimal_publisher')
 
-        # Specify data type and topic name. Specify queue size (limit amount of queued messages)
-        self.publisher_ = self.create_publisher(String, 'topic', 10)
+        self.navsatfix_publisher = self.create_publisher(NavSatFix, '/gps/moving_rover/navsatfix', qos_profile=qos_profile_sensor_data)
+        self.heading_publisher = self.create_publisher(PoseWithCovarianceStamped, '/gps/moving_rover/heading', qos_profile=qos_profile_sensor_data)
 
-        # Create a timer that will call the 'timer_callback' function every timer_period second.
-        timer_period = 0.5  # seconds
+        self.subscription = self.create_subscription(
+            RTCMMessage,
+            '/gps/static_base/rtcm_correction',
+            self.rtcm_callback,
+            10)
+        self.subscription  # prevent unused variable warning
+
+        timer_period = 1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
-        self.i = 0
 
+        self.delimiter = ','
+
+        self.dev_path = "/dev/ttyACM0"
+
+        try:
+            self.stream = Serial(self.dev_path, baudrate=115200)
+        except SerialException:
+            print("Error: Could not find device on:", self.dev_path)
+            exit(1)
+
+        self.stream.reset_input_buffer() # Do we need this?
+
+        self.crc_calculator = Calculator(Crc32.CRC32, optimized=True)
+
+        self.navsatfix_msg = NavSatFix()
+        self.heading_msg = PoseWithCovarianceStamped()
+
+        # TODO - handle kb interrupt and sigkill
+
+
+    # Author: AutomaticAddison.com
+    def get_quaternion_from_euler(self, roll, pitch, yaw):
+        """
+        Convert an Euler angle to a quaternion.
+        
+        Input
+            :param roll: The roll (rotation around x-axis) angle in radians.
+            :param pitch: The pitch (rotation around y-axis) angle in radians.
+            :param yaw: The yaw (rotation around z-axis) angle in radians.
+        
+        Output
+            :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
+        """
+        qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+        qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
+        qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
+        qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
+    
+        return [qx, qy, qz, qw]
+    
+    def rtcm_callback(self, msg):
+        # TODO - create checksum of rtcm data
+        # add checksum to end of rtcm data
+        # send rtcm data to moving base gps
+        ...
 
     def timer_callback(self):
-        msg = String()
-        msg.data = 'Hello World: %d' % self.i
 
-        # Publish the message.
-        self.publisher_.publish(msg)
+        line = self.stream.readline().decode().rstrip()
 
-        # Log the message.
-        self.get_logger().info('Publishing: "%s"' % msg.data)
-        self.i += 1
+        if len(line) == 0:
+            print("Warning: Data length zero.")
+            return
+        
+        try:
+            last_delim_index = line.rindex(',')
+        except ValueError:
+            print("Warning: No delimiter, skipping data.")
+            return
+
+        expected_crc = line[last_delim_index + 1 :]
+        data = line[:last_delim_index + 1]
+
+        if expected_crc != str(self.crc_calculator.checksum(data.encode())):
+            print("Warning: Checksum failed!")
+            return
+        
+        data_array = data[:-1].split(self.delimiter)
+
+        gnss_fix_ok, rel_pos_valid, latitude, longitude, relative_heading = data_array
+
+        time_stamp = self.get_clock().now().to_msg()
+
+        # NavSatFix Message
+        # https://docs.ros2.org/latest/api/sensor_msgs/msg/NavSatFix.html
+
+        if int(gnss_fix_ok) == 0:
+            print("Warning: No GPS fix!")
+            return
+
+        self.navsatfix_msg.header.stamp = time_stamp
+        self.navsatfix_msg.header.frame_id = "map"
+
+        self.navsatfix_msg.status.status = int(gnss_fix_ok) - 1 # -1 = No fix for msg type
+        
+        self.navsatfix_msg.latitude = float(latitude) / 10000000
+        self.navsatfix_msg.longitude = float(longitude) / 10000000
+
+        # TODO - Add covariance matrix
+        self.navsatfix_msg.position_covariance_type = NavSatFix.COVARIANCE_TYPE_UNKNOWN
+
+        self.navsatfix_publisher.publish(self.navsatfix_msg)
+
+        # Heading Message
+        # https://docs.ros.org/en/api/geometry_msgs/html/msg/PoseWithCovarianceStamped.html
+
+        if int(rel_pos_valid) == 0:
+            print("Warning: Relative position is invalid!")
+            return
+
+        yaw = np.radians(float(relative_heading) / 100000)
+
+        qx, qy, qz, qw = self.get_quaternion_from_euler(0, 0, yaw)
+
+        self.heading_msg.header.stamp = time_stamp
+        self.heading_msg.header.frame_id = "map"
+
+        # TODO - Add covariance matrix
+
+        self.heading_msg.pose.pose.orientation.x = qx
+        self.heading_msg.pose.pose.orientation.y = qy
+        self.heading_msg.pose.pose.orientation.z = qz
+        self.heading_msg.pose.pose.orientation.w = qw
+
+        self.heading_publisher.publish(self.heading_msg)
 
 
 def main(args=None):

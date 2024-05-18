@@ -1,13 +1,12 @@
-from serial import Serial
+from serial import Serial, SerialException
 
 import rclpy
 from rclpy.node import Node
-from rtcm_msgs.msg import Message as ROS_RTCM_Message
+from rtcm_msgs.msg import Message as RTCMMessage
 
 from pyrtcm import RTCMReader
 
 import numpy as np
-
 
 class MinimalPublisher(Node):
 
@@ -16,30 +15,32 @@ class MinimalPublisher(Node):
         # Give the node a name.
         super().__init__('rtcm_publisher')
 
-        self.stream = None
-        self.stream = Serial('/dev/ttyACM0', 460800, timeout=3)
+        self.dev_path = '/dev/ttyACM0'
+
+        try:
+            self.stream = Serial(self.dev_path, 460800, timeout=3) # TODO - double check baudrate
+        except SerialException:
+            print("Error: Cannot find GPS device on:", self.dev_path)
+        
         self.rtcm_reader = RTCMReader(self.stream)
 
         # Specify data type and topic name. Specify queue size (limit amount of queued messages)
-        self.publisher_ = self.create_publisher(ROS_RTCM_Message, '/base/gps/rtcm3', 10)
+        self.publisher_ = self.create_publisher(RTCMMessage, '/gps/static_base/rtcm_correction', 10)
+
+        self.msg = RTCMMessage()
 
         # Create a timer that will call the 'timer_callback' function every timer_period second.
         timer_period = 1/5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-    def __del__(self):
-        if self.stream != None:
-            self.stream.close()
-
     def timer_callback(self):
         
-        self.msg = ROS_RTCM_Message()
         (raw_data, parsed_data) = self.rtcm_reader.read()
 
         if raw_data is None:
             return
 
-        np_arr = np.frombuffer(raw_data, dtype=np.uint8)
+        np_arr = np.frombuffer(raw_data, dtype=np.uint8) # Does this need to be uint8?
 
         if np_arr is None:
             return
@@ -59,9 +60,6 @@ def main(args=None):
 
     rclpy.spin(minimal_publisher)
 
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
     minimal_publisher.destroy_node()
     rclpy.shutdown()
 
