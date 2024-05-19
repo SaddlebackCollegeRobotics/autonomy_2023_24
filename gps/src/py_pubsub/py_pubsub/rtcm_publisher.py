@@ -18,11 +18,12 @@ class MinimalPublisher(Node):
         self.dev_path = '/dev/ttyACM0'
 
         try:
-            self.stream = Serial(self.dev_path, 460800, timeout=3) # TODO - double check baudrate
+            self.serial = Serial(self.dev_path, 460800, timeout=3) # TODO - double check baudrate
         except SerialException:
             print("Error: Cannot find GPS device on:", self.dev_path)
+            exit(1)
         
-        self.rtcm_reader = RTCMReader(self.stream)
+        self.rtcm_reader = RTCMReader(self.serial)
 
         # Specify data type and topic name. Specify queue size (limit amount of queued messages)
         self.publisher_ = self.create_publisher(RTCMMessage, '/gps/static_base/rtcm_correction', 10)
@@ -30,7 +31,7 @@ class MinimalPublisher(Node):
         self.msg = RTCMMessage()
 
         # Create a timer that will call the 'timer_callback' function every timer_period second.
-        timer_period = 1/5  # seconds
+        timer_period = 1/2  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
     def timer_callback(self):
@@ -40,12 +41,12 @@ class MinimalPublisher(Node):
         if raw_data is None:
             return
 
+        print(raw_data)
+
         np_arr = np.frombuffer(raw_data, dtype=np.uint8) # Does this need to be uint8?
 
         if np_arr is None:
             return
-
-        print(np_arr.tolist())
 
         self.msg.message = np_arr.tolist()
         self.msg.header.stamp = self.get_clock().now().to_msg()

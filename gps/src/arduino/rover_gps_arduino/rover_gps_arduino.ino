@@ -32,14 +32,9 @@ public:
     gps.checkCallbacks();
   }
 
-  void getRTCM()
+  void pushRTCM(uint8_t *dataBytes, size_t numDataBytes)
   {
-
-  }
-
-  void sendRTCM()
-  {
-
+    gps.pushRawData(dataBytes, numDataBytes); 
   }
 
   int32_t getRelativeHeading(){return relativeHeading;}
@@ -52,6 +47,8 @@ public:
 
   bool IsGNSSFixOK(){return gnssFixOK;}
   bool IsRelPosValid(){return relPosValid;}
+
+  uint8_t getCarrSolnType(){return carrSolnType;}
 
   friend void updatePosition(WhichGPS which, UBX_NAV_PVT_data_t *ubxDataStruct);
   friend void updateHPPosition(WhichGPS which, UBX_NAV_HPPOSLLH_data_t *ubxDataStruct);
@@ -71,6 +68,8 @@ private:
 
   bool gnssFixOK = false;
   bool relPosValid = false;
+
+  uint8_t carrSolnType = 0; // 0=none, 1=float, 2=fixed
 };
 
 void updatePosition(WhichGPS which, UBX_NAV_PVT_data_t *ubxDataStruct)
@@ -85,6 +84,8 @@ void updatePosition(WhichGPS which, UBX_NAV_PVT_data_t *ubxDataStruct)
 
   obj->latitude = ubxDataStruct->lat; // 1e^-7
   obj->longitude = ubxDataStruct->lon;// 1e^-7
+
+  obj->carrSolnType = ubxDataStruct->flags.bits.carrSoln;
 }
 
 void updateHPPosition(WhichGPS which, UBX_NAV_HPPOSLLH_data_t *ubxDataStruct)
@@ -144,30 +145,17 @@ GPS_Module *moving_rover;
 String outBuffer;
 String inBuffer;
 
-void setup()
+void writeOutGPSData()
 {
-  delay(1000);
-
-  Serial.begin(115200);
-
-  Wire.begin();
-  Wire.setClock(400000); //Increase I2C clock speed to 400kHz
-
-  moving_base = getGPS(WhichGPS::MovingBase);
-  moving_rover = getGPS(WhichGPS::MovingRover);
-  
-}
-
-void loop()
-{
-  moving_base->update();
-  moving_rover->update();
-
   outBuffer = "";
   
   outBuffer += moving_rover->IsGNSSFixOK();
   outBuffer += ",";
   outBuffer += moving_rover->IsRelPosValid();
+  outBuffer += ",";
+  outBuffer += moving_base->getCarrSolnType();
+  outBuffer += ",";
+  outBuffer += moving_rover->getCarrSolnType();
   outBuffer += ",";
   outBuffer += moving_rover->getLatitude();
   outBuffer += ",";
@@ -186,6 +174,55 @@ void loop()
   outBuffer += checksum;
 
   Serial.println(outBuffer);
+}
 
+uint8_t store[256];
+uint16_t numBytes = 0; // Record the number of bytes received from Serial
+
+void readInRTCM()
+{
+  // Buffer and push the RTCM data to the module
+  // Code provided by SparkFun
+
+  while ((Serial.available()) && (numBytes < 256)) // Check if data has been received
+  {
+    store[numBytes++] = Serial.read(); // Read a byte from rtcmSerial and store it
+  }
+  
+  if (numBytes > 0) // Check if data was received
+  {
+    moving_base->pushRTCM(((uint8_t *)&store), numBytes); // Push the RTCM data via I2C
+    numBytes = 0; // Reset numBytes
+  }
+
+}
+
+void setup()
+{
   delay(1000);
+
+  // Serial.begin(115200);
+  Serial.begin(460800);
+
+  Serial.flush();
+
+  while (!Serial){}
+
+  Wire.begin();
+  Wire.setClock(400000); //Increase I2C clock speed to 400kHz
+
+  moving_base = getGPS(WhichGPS::MovingBase);
+  moving_rover = getGPS(WhichGPS::MovingRover);
+  
+}
+
+void loop()
+{
+  moving_base->update();
+  moving_rover->update();
+
+  readInRTCM();
+  writeOutGPSData();
+
+  delay(500);
 }

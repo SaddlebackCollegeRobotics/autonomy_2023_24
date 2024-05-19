@@ -27,27 +27,30 @@ class MinimalPublisher(Node):
             '/gps/static_base/rtcm_correction',
             self.rtcm_callback,
             10)
-        self.subscription  # prevent unused variable warning
+        # self.subscription  # prevent unused variable warning
 
         timer_period = 1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
         self.delimiter = ','
 
-        self.dev_path = "/dev/ttyACM0"
+        self.dev_path = "/dev/ttyACM1"
 
         try:
-            self.stream = Serial(self.dev_path, baudrate=115200)
+            self.serial = Serial(self.dev_path, baudrate=460800)
         except SerialException:
             print("Error: Could not find device on:", self.dev_path)
             exit(1)
 
-        self.stream.reset_input_buffer() # Do we need this?
+        self.serial.flush()
+        # self.serial.reset_input_buffer() # Do we need this?
 
         self.crc_calculator = Calculator(Crc32.CRC32, optimized=True)
 
         self.navsatfix_msg = NavSatFix()
         self.heading_msg = PoseWithCovarianceStamped()
+
+        self.carr_soln_dict = {"0":"None", "1":"Float", "2":"Fixed"}
 
         # TODO - handle kb interrupt and sigkill
 
@@ -72,15 +75,21 @@ class MinimalPublisher(Node):
     
         return [qx, qy, qz, qw]
     
-    def rtcm_callback(self, msg):
-        # TODO - create checksum of rtcm data
-        # add checksum to end of rtcm data
-        # send rtcm data to moving base gps
-        ...
+    def rtcm_callback(self, msg: RTCMMessage):
+        
+        # Take incoming rtcm correction data, create a checksum,
+        # and send data along with checksum to microcontroller.
+
+        # TODO - Add checksum.
+
+        data_buffer = msg.message.tobytes()
+        self.serial.write(data_buffer)
 
     def timer_callback(self):
 
-        line = self.stream.readline().decode().rstrip()
+        line = self.serial.readline().decode().rstrip()
+
+        print("="*40)
 
         if len(line) == 0:
             print("Warning: Data length zero.")
@@ -101,7 +110,13 @@ class MinimalPublisher(Node):
         
         data_array = data[:-1].split(self.delimiter)
 
-        gnss_fix_ok, rel_pos_valid, latitude, longitude, relative_heading = data_array
+        gnss_fix_ok, rel_pos_valid, mb_carr_soln_type, mr_carr_soln_type, latitude, longitude, relative_heading = data_array
+
+        print("Moving Base Carr Soln: ", end="")
+        print(self.carr_soln_dict[mb_carr_soln_type])
+
+        print("Moving Rover Carr Soln: ", end="")
+        print(self.carr_soln_dict[mr_carr_soln_type])
 
         time_stamp = self.get_clock().now().to_msg()
 
