@@ -10,7 +10,7 @@ from .zed_camera import *
 
 class Dummy_Camera(Node):
     
-    def __init__(self, camera=0):
+    def __init__(self, camera=2):
         super().__init__('dummy_camera')
         self.publisher_ = self.create_publisher(Image, 'autonomy/camera_image', 10)
 
@@ -37,7 +37,7 @@ class Dummy_Camera(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    dummy_camera = Dummy_Camera(camera=0)
+    dummy_camera = Dummy_Camera(camera=2)
     rclpy.spin(dummy_camera)
 
     dummy_camera.destroy_node()
