@@ -90,11 +90,12 @@ class Aruco_Detector():
                 # clean corner data and package as a single tuple
                 clean_corners = corners.reshape(4, 2).astype(int) 
                 
-                tr_pos = clean_corners[0].ravel()
-                tl_pos = clean_corners[1].ravel()
-                br_pos = clean_corners[2].ravel()
+                tr_pos = clean_corners[0].ravel()  # top right position, (x,y)
+                tl_pos = clean_corners[1].ravel()  # top left position, (x,y)
+                br_pos = clean_corners[2].ravel()  # bottom right position, (x,y)
+                bl_pos = clean_corners[3].ravel()  # bottom left position, (x,y)
 
-                tag_center_x = (tr_pos[0]+tl_pos[0]) / 2
+                tag_center_x = (tr_pos[0]+tl_pos[0]) / 2  
                 tag_center_y = (tr_pos[1]+br_pos[1]) / 2
 
                 normalized_tag_x = (tag_center_x-frame.shape[1]/2) / (frame.shape[1]/2)
@@ -130,7 +131,7 @@ class Aruco_Detector():
                 print_text(frame, f'id: {tag.id} Dist: {tag.dist}', tag.tr)
                 print_text(frame, f'Pos: ({tag.x_pos:.2}, {tag.y_pos:.2})', tag.br)
 
-        return tags, frame  
+        return tags, frame
         
     def __del__(self):
         # release all resources

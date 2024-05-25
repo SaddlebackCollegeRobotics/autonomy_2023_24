@@ -41,13 +41,15 @@ class Tag_Detector(Node):
     def timer_callback(self):
         if self.frame.shape == (2, 2): return
 
-        tags, frame = self.detector.detect_tags(self.frame) 
+        tags, frame = self.detector.detect_tags(self.frame)
         
         for tag in tags:
-            self.msg.object_name = "aruco_tag" + tag.id
-            self.msg.bottom_left.x, self.msg.top_right.x = tag.x_pos
-            self.msg.bottom_left.y, self.msg.top_right.y = tag.y_pos
-            self.msg.dist = tag.dist
+            self.msg.object_name = "aruco_tag" + str(tag.id)
+            self.msg.bottom_left.x = float(tag.bl[0])
+            self.msg.bottom_left.y = float(tag.bl[1])
+            self.msg.top_right.x = float(tag.tr[0])
+            self.msg.top_right.y = float(tag.tr[1])
+            self.msg.relative_distance = tag.dist
 
         # TODO : make compatible with message type
         for tag in tags:
