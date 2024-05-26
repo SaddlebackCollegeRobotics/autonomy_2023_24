@@ -5,12 +5,12 @@ from crc import Calculator, Crc32
 # pip3 install crc
 from rclpy.qos import qos_profile_sensor_data
 
+from std_msgs.msg import Float64
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from rtcm_msgs.msg import Message as RTCMMessage
 
 import numpy as np
-
 
 class MinimalPublisher(Node):
 
@@ -19,8 +19,10 @@ class MinimalPublisher(Node):
         # Give the node a name.
         super().__init__('minimal_publisher')
 
+
         self.navsatfix_publisher = self.create_publisher(NavSatFix, '/gps/moving_rover/navsatfix', qos_profile=qos_profile_sensor_data)
-        self.heading_publisher = self.create_publisher(PoseWithCovarianceStamped, '/gps/moving_rover/heading', qos_profile=qos_profile_sensor_data)
+        self.heading_pose_publisher = self.create_publisher(PoseWithCovarianceStamped, '/gps/moving_rover/heading_pose', qos_profile=qos_profile_sensor_data)
+        self.heading_angle_publisher = self.create_publisher(Float64, '/gps/moving_rover/heading_angle', qos_profile=qos_profile_sensor_data)
 
         self.subscription = self.create_subscription(
             RTCMMessage,
@@ -48,7 +50,8 @@ class MinimalPublisher(Node):
         self.crc_calculator = Calculator(Crc32.CRC32, optimized=True)
 
         self.navsatfix_msg = NavSatFix()
-        self.heading_msg = PoseWithCovarianceStamped()
+        self.heading_pose_msg = PoseWithCovarianceStamped()
+        self.heading_angle_msg = Float64()
 
         self.carr_soln_dict = {"0":"None", "1":"Float", "2":"Fixed"}
 
@@ -147,21 +150,24 @@ class MinimalPublisher(Node):
             print("Warning: Relative position is invalid!")
             return
 
-        yaw = np.radians(float(relative_heading) / 100000)
+        yaw_deg = float(relative_heading) / 100000
 
-        qx, qy, qz, qw = self.get_quaternion_from_euler(0, 0, yaw)
+        self.heading_angle_msg.data = yaw_deg
 
-        self.heading_msg.header.stamp = time_stamp
-        self.heading_msg.header.frame_id = "map"
+        qx, qy, qz, qw = self.get_quaternion_from_euler(0, 0, np.radians(yaw_deg))
+
+        self.heading_pose_msg.header.stamp = time_stamp
+        self.heading_pose_msg.header.frame_id = "map"
 
         # TODO - Add covariance matrix
 
-        self.heading_msg.pose.pose.orientation.x = qx
-        self.heading_msg.pose.pose.orientation.y = qy
-        self.heading_msg.pose.pose.orientation.z = qz
-        self.heading_msg.pose.pose.orientation.w = qw
+        self.heading_pose_msg.pose.pose.orientation.x = qx
+        self.heading_pose_msg.pose.pose.orientation.y = qy
+        self.heading_pose_msg.pose.pose.orientation.z = qz
+        self.heading_pose_msg.pose.pose.orientation.w = qw
 
-        self.heading_publisher.publish(self.heading_msg)
+        self.heading_angle_publisher.publish(self.heading_angle_msg)
+        self.heading_pose_publisher.publish(self.heading_pose_msg)
 
 
 def main(args=None):
