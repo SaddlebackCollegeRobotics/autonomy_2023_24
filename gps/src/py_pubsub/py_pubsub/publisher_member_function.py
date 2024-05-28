@@ -39,7 +39,7 @@ class MinimalPublisher(Node):
         self.dev_path = "/dev/ttyACM1"
 
         try:
-            self.serial = Serial(self.dev_path, baudrate=460800)
+            self.serial = Serial(self.dev_path, baudrate=460800, timeout=3)
         except SerialException:
             print("Error: Could not find device on:", self.dev_path)
             exit(1)
