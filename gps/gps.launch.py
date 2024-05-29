@@ -9,49 +9,62 @@ from launch.actions import GroupAction
 from launch_ros.actions import SetRemap
 from launch_ros.actions import Node
 
+
 def generate_launch_description():
 
     moving_base = GroupAction(
         actions=[
-
             IncludeLaunchDescription(
-
-                PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('ublox_dgnss'), 'launch',
-                'moving_base.launch.py')]),
+                PythonLaunchDescriptionSource(
+                    [
+                        os.path.join(
+                            get_package_share_directory("ublox_dgnss"),
+                            "launch",
+                            "moving_base.launch.py",
+                        )
+                    ]
+                ),
             )
-            
         ]
     )
 
     moving_rover = GroupAction(
         actions=[
-
             IncludeLaunchDescription(
-
-                PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('ublox_dgnss'), 'launch',
-                'moving_rover.launch.py')]),
+                PythonLaunchDescriptionSource(
+                    [
+                        os.path.join(
+                            get_package_share_directory("ublox_dgnss"),
+                            "launch",
+                            "moving_rover.launch.py",
+                        )
+                    ]
+                ),
             )
-            
         ]
     )
 
     heading_republisher = Node(
-        package='gps_driver',
-        executable='heading_republisher',
+        package="gps_driver",
+        executable="heading_republisher",
     )
 
     gps_qos_republisher = Node(
-        package='gps_driver',
-        executable='gps_republisher',
+        package="gps_driver",
+        executable="gps_republisher",
     )
 
+    gps_rtcm_publisher = Node(
+        package="gps_driver",
+        executable="rtcm_publisher",
+    )
 
-    return LaunchDescription([
-      moving_base,
-      moving_rover,
-      heading_republisher,
-      gps_qos_republisher,
-   ])
-
+    return LaunchDescription(
+        [
+            moving_base,
+            moving_rover,
+            heading_republisher,
+            gps_qos_republisher,
+            gps_rtcm_publisher,
+        ]
+    )
