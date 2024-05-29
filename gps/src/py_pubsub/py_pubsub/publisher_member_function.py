@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from serial import Serial, SerialException
 from crc import Calculator, Crc32
+
 # pip3 install crc
 from rclpy.qos import qos_profile_sensor_data
 
@@ -12,29 +13,39 @@ from rtcm_msgs.msg import Message as RTCMMessage
 
 import numpy as np
 
+
 class MinimalPublisher(Node):
 
     def __init__(self):
 
         # Give the node a name.
-        super().__init__('minimal_publisher')
+        super().__init__("minimal_publisher")
 
-
-        self.navsatfix_publisher = self.create_publisher(NavSatFix, '/gps/moving_rover/navsatfix', qos_profile=qos_profile_sensor_data)
-        self.heading_pose_publisher = self.create_publisher(PoseWithCovarianceStamped, '/gps/moving_rover/heading_pose', qos_profile=qos_profile_sensor_data)
-        self.heading_angle_publisher = self.create_publisher(Float64, '/gps/moving_rover/heading_angle', qos_profile=qos_profile_sensor_data)
+        self.navsatfix_publisher = self.create_publisher(
+            NavSatFix,
+            "/gps/moving_rover/navsatfix",
+            qos_profile=qos_profile_sensor_data,
+        )
+        self.heading_pose_publisher = self.create_publisher(
+            PoseWithCovarianceStamped,
+            "/gps/moving_rover/heading_pose",
+            qos_profile=qos_profile_sensor_data,
+        )
+        self.heading_angle_publisher = self.create_publisher(
+            Float64,
+            "/gps/moving_rover/heading_angle",
+            qos_profile=qos_profile_sensor_data,
+        )
 
         self.subscription = self.create_subscription(
-            RTCMMessage,
-            '/gps/static_base/rtcm_correction',
-            self.rtcm_callback,
-            10)
+            RTCMMessage, "/gps/static_base/rtcm_correction", self.rtcm_callback, 10
+        )
         # self.subscription  # prevent unused variable warning
 
         timer_period = 1  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
 
-        self.delimiter = ','
+        self.delimiter = ","
 
         self.dev_path = "/dev/ttyACM1"
 
@@ -53,67 +64,88 @@ class MinimalPublisher(Node):
         self.heading_pose_msg = PoseWithCovarianceStamped()
         self.heading_angle_msg = Float64()
 
-        self.carr_soln_dict = {"0":"None", "1":"Float", "2":"Fixed"}
+        self.carr_soln_dict = {"0": "None", "1": "Float", "2": "Fixed"}
 
         # TODO - handle kb interrupt and sigkill
-
 
     # Author: AutomaticAddison.com
     def get_quaternion_from_euler(self, roll, pitch, yaw):
         """
         Convert an Euler angle to a quaternion.
-        
+
         Input
             :param roll: The roll (rotation around x-axis) angle in radians.
             :param pitch: The pitch (rotation around y-axis) angle in radians.
             :param yaw: The yaw (rotation around z-axis) angle in radians.
-        
+
         Output
             :return qx, qy, qz, qw: The orientation in quaternion [x,y,z,w] format
         """
-        qx = np.sin(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) - np.cos(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-        qy = np.cos(roll/2) * np.sin(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.cos(pitch/2) * np.sin(yaw/2)
-        qz = np.cos(roll/2) * np.cos(pitch/2) * np.sin(yaw/2) - np.sin(roll/2) * np.sin(pitch/2) * np.cos(yaw/2)
-        qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
-    
+        qx = np.sin(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) - np.cos(
+            roll / 2
+        ) * np.sin(pitch / 2) * np.sin(yaw / 2)
+        qy = np.cos(roll / 2) * np.sin(pitch / 2) * np.cos(yaw / 2) + np.sin(
+            roll / 2
+        ) * np.cos(pitch / 2) * np.sin(yaw / 2)
+        qz = np.cos(roll / 2) * np.cos(pitch / 2) * np.sin(yaw / 2) - np.sin(
+            roll / 2
+        ) * np.sin(pitch / 2) * np.cos(yaw / 2)
+        qw = np.cos(roll / 2) * np.cos(pitch / 2) * np.cos(yaw / 2) + np.sin(
+            roll / 2
+        ) * np.sin(pitch / 2) * np.sin(yaw / 2)
+
         return [qx, qy, qz, qw]
-    
+
     def rtcm_callback(self, msg: RTCMMessage):
-        
+
         # Take incoming rtcm correction data, create a checksum,
         # and send data along with checksum to microcontroller.
-
+        # print(f"Received RTCM correction")
         # TODO - Add checksum.
 
+        msg.message.fromlist((msg.message.tolist() + [255] * 2))
         data_buffer = msg.message.tobytes()
+        # print(f"Buffer: {data_buffer}")
         self.serial.write(data_buffer)
 
     def timer_callback(self):
 
         line = self.serial.readline().decode().rstrip()
 
-        print("="*40)
+        print("=" * 40)
 
         if len(line) == 0:
             print("Warning: Data length zero.")
             return
-        
+
+        if line[0] == "#":
+            print(f"Received debug msg: {line}")
+            return
+
         try:
-            last_delim_index = line.rindex(',')
+            last_delim_index = line.rindex(",")
         except ValueError:
             print("Warning: No delimiter, skipping data.")
             return
 
         expected_crc = line[last_delim_index + 1 :]
-        data = line[:last_delim_index + 1]
+        data = line[: last_delim_index + 1]
 
         if expected_crc != str(self.crc_calculator.checksum(data.encode())):
             print("Warning: Checksum failed!")
             return
-        
+
         data_array = data[:-1].split(self.delimiter)
 
-        gnss_fix_ok, rel_pos_valid, mb_carr_soln_type, mr_carr_soln_type, latitude, longitude, relative_heading = data_array
+        (
+            gnss_fix_ok,
+            rel_pos_valid,
+            mb_carr_soln_type,
+            mr_carr_soln_type,
+            latitude,
+            longitude,
+            relative_heading,
+        ) = data_array
 
         print("Moving Base Carr Soln: ", end="")
         print(self.carr_soln_dict[mb_carr_soln_type])
@@ -133,8 +165,10 @@ class MinimalPublisher(Node):
         self.navsatfix_msg.header.stamp = time_stamp
         self.navsatfix_msg.header.frame_id = "map"
 
-        self.navsatfix_msg.status.status = int(gnss_fix_ok) - 1 # -1 = No fix for msg type
-        
+        self.navsatfix_msg.status.status = (
+            int(gnss_fix_ok) - 1
+        )  # -1 = No fix for msg type
+
         self.navsatfix_msg.latitude = float(latitude) / 10000000
         self.navsatfix_msg.longitude = float(longitude) / 10000000
 
@@ -184,5 +218,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

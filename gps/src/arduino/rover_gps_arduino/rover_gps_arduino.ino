@@ -176,23 +176,48 @@ void writeOutGPSData()
   Serial.println(outBuffer);
 }
 
-uint8_t store[256];
+uint8_t store[256 + 3];
 uint16_t numBytes = 0; // Record the number of bytes received from Serial
+// uint16_t numSeqOnes = 0; // Number of sequential 1's read in serial
+// 16 1's in a row denotes the ending of a valid message
 
 void readInRTCM()
 {
   // Buffer and push the RTCM data to the module
   // Code provided by SparkFun
+  if (!Serial.available()) {
+    Serial.println("# Serial rtcm correction not available!");
+  }
 
-  while ((Serial.available()) && (numBytes < 256)) // Check if data has been received
+  while ((Serial.available()) && (numBytes < (256 + 3))) // Check if data has been received
   {
     store[numBytes++] = Serial.read(); // Read a byte from rtcmSerial and store it
+
+    // if (store[numBytes-1] == 255) {
+    //   numSeqOnes++;
+    //   Serial.println("# Found one 0xff");
+    // } else {
+    //   numSeqOnes = 0;
+    // }
+    
+    // if (numSeqOnes == 2) {
+    //   Serial.println("# Received correct check!");
+    //   break;
+    // }
   }
+
+  // if (numSeqOnes != 2) {
+  //     Serial.print("# Did not receive check 0xffff!");
+  //     Serial.println((int)numSeqOnes);
+  //   return;
+  // }
   
   if (numBytes > 0) // Check if data was received
   {
-    moving_base->pushRTCM(((uint8_t *)&store), numBytes); // Push the RTCM data via I2C
+    Serial.println("# Successfully pushing rtcm corr to gps");
+    moving_base->pushRTCM(((uint8_t *)&store), numBytes /*- numSeqOnes*/); // Push the RTCM data via I2C
     numBytes = 0; // Reset numBytes
+    // numSeqOnes = 0;
   }
 
 }
@@ -222,6 +247,7 @@ void loop()
   moving_rover->update();
 
   readInRTCM();
+  Serial.println("# Sending GPS data...");
   writeOutGPSData();
 
   delay(500);
