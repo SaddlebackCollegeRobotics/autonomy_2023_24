@@ -48,7 +48,7 @@ class MinimalSubscriber(Node):
             rel_pos_heading_rad = np.deg2rad(standard_notation)
 
             self.get_logger().info(str(standard_notation))
-            self.angle_pub_.publish(Float64(data=float(rel_pos_heading_rad)))
+            self.angle_pub_.publish(Float64(data=float(standard_notation)))
 
             heading_quaternion = self.get_quaternion_from_euler(
                 0, 0, rel_pos_heading_rad
