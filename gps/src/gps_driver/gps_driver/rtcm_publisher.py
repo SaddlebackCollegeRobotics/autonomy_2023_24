@@ -37,6 +37,7 @@ class MinimalPublisher(Node):
 
     def try_connect_serial(self):
         self.stream = None
+        self.rtcm_reader = None
 
         # Try to iterate through the three USB ports in use
         # Assume that ublox_gnss modules have already taken control of other ports
