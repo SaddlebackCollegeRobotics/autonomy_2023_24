@@ -1,0 +1,23 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/opt/ros/humble/include/**",
+        "/home/cameron/workspaces/autonomy_2023_24/gps/src/ublox_dgnss/ntrip_client_node/include/**",
+        "/home/cameron/workspaces/autonomy_2023_24/gps/src/ublox_dgnss/ublox_dgnss_node/include/**",
+        "/home/cameron/workspaces/autonomy_2023_24/gps/src/ublox_dgnss/ublox_nav_sat_fix_hp_node/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}
