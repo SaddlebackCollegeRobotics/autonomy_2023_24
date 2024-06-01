@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import Float64, Float64MultiArray, String
+from ublox_ubx_msgs.msg import UBXNavRelPosNED
 from sensor_msgs.msg import NavSatFix, NavSatStatus
 
 from math import atan2, degrees, copysign
@@ -37,14 +38,18 @@ class MinimalPublisher(Node):
         )
         self.gps_fix_subscriber  # prevent unused variable warning
 
+        # self.gps_heading_subscriber = self.create_subscription(
+        #     Float64,
+        #     "/gps/moving_rover/heading_angle",
+        #     self.gps_heading_callback,
+        #     qos_profile_sensor_data,
+        # )
         self.gps_heading_subscriber = self.create_subscription(
-            Float64,
-            "/gps/moving_rover/heading_angle",
+            UBXNavRelPosNED,
+            "/rover/ubx_nav_rel_pos_ned",
             self.gps_heading_callback,
-            qos_profile_sensor_data,
+            qos_profile=qos_profile_sensor_data,
         )
-        self.gps_heading_subscriber  # prevent unused variable warning
-
         self.led_pub = self.create_publisher(String, "/led_pub", 10)
 
         self.drive_input_msg = Float64MultiArray()
@@ -76,9 +81,9 @@ class MinimalPublisher(Node):
             self.gps_fix_ok = True
             self.current_position = (msg.latitude, msg.longitude)
 
-    def gps_heading_callback(self, msg: Float64):
+    def gps_heading_callback(self, msg):
         # stops publishing when cannot find heading
-        self.current_heading = msg.data
+        self.current_heading = msg.rel_pos_heading
 
     def waypoint_callback(self, msg: Float64MultiArray):
 
@@ -88,6 +93,14 @@ class MinimalPublisher(Node):
             continue
 
         self.led_pub.publish(String(data="red"))
+
+        self.drive_input_msg.data = [1.0, 1.0]
+        self.drive_input_publisher.publish(self.drive_input_msg)
+
+        sleep(2)
+
+        self.drive_input_msg.data = [0.0, 0.0]
+        self.drive_input_publisher.publish(self.drive_input_msg)
 
         self.current_position = None
         self.current_heading = None
@@ -113,17 +126,23 @@ class MinimalPublisher(Node):
             return
 
         current_position = self.current_position
-        if self.previous_position is not None:
-            self.est_heading = degrees(
-                atan2(
-                    self.current_position[1] - self.previous_position[1],
-                    self.current_position[0] - self.previous_position[0],
-                )
-            )
+        # if self.previous_position is not None:
+        #     self.est_heading = (
+        #         (
+        #             degrees(
+        #                 atan2(
+        #                     self.current_position[1] - self.previous_position[1],
+        #                     self.current_position[0] - self.previous_position[0],
+        #                 )
+        #             )
+        #             % 360
+        #         )
+        #         + 90
+        #     ) % 360
 
-        self.previous_position = current_position
+        # self.previous_position = current_position
         current_heading = self.current_heading
-        # current_heading = self.est_heading
+        current_heading = self.est_heading
 
         x = self.waypoint_list[0] - current_position[0]  # latitude diff
         y = self.waypoint_list[1] - current_position[1]  # longitude diff

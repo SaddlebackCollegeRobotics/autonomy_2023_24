@@ -6,15 +6,22 @@ from sensor_msgs.msg import NavSatFix, NavSatStatus
 
 from rclpy.qos import qos_profile_sensor_data
 
+
 class MinimalPublisher(Node):
 
     def __init__(self):
 
-        super().__init__('mock_data_publisher')
+        super().__init__("mock_data_publisher")
 
-        self.waypoint_publisher = self.create_publisher(Float64MultiArray, '/autonomy/waypoints', 10)
-        self.gps_pos_publisher = self.create_publisher(NavSatFix, '/base/fix', qos_profile_sensor_data)
-        self.gps_heading_publisher = self.create_publisher(Float64, '/gps/moving_rover/heading_angle', qos_profile_sensor_data)
+        self.waypoint_publisher = self.create_publisher(
+            Float64MultiArray, "/autonomy/waypoints", 10
+        )
+        self.gps_pos_publisher = self.create_publisher(
+            NavSatFix, "/base/fix", qos_profile_sensor_data
+        )
+        self.gps_heading_publisher = self.create_publisher(
+            Float64, "/gps/moving_rover/heading_angle", qos_profile_sensor_data
+        )
 
         # test data
 
@@ -23,9 +30,9 @@ class MinimalPublisher(Node):
             (2.0, -2.0),
             (-2.0, -2.0),
             (-2.0, 2.0),
-            (0.0, 0.0)
+            (0.0, 0.0),
         ]
-        
+
         self.heading_list = [
             0,
             # 45,
@@ -49,14 +56,16 @@ class MinimalPublisher(Node):
 
         self.publish_waypoints()
 
-        timer_period = 1/5
-        self.gps_pos_timer = self.create_timer(timer_period, self.publish_gps_pos)
-        self.gps_heading_timer = self.create_timer(timer_period, self.publish_gps_heading)
+        # timer_period = 1 / 5
+        # self.gps_pos_timer = self.create_timer(timer_period, self.publish_gps_pos)
+        # self.gps_heading_timer = self.create_timer(
+        #     timer_period, self.publish_gps_heading
+        # )
 
     def publish_gps_pos(self):
 
         current_pos = self.gps_pos_list[self.gps_pos_list_index]
-        self.gps_pos_list_index += 1   
+        self.gps_pos_list_index += 1
 
         if self.gps_pos_list_index >= len(self.gps_pos_list):
             self.gps_pos_list_index = 0
@@ -64,7 +73,7 @@ class MinimalPublisher(Node):
         self.gps_pos_msg.latitude = current_pos[0]
         self.gps_pos_msg.longitude = current_pos[1]
 
-        self.gps_pos_msg.status.status = NavSatStatus.STATUS_FIX  
+        self.gps_pos_msg.status.status = NavSatStatus.STATUS_FIX
 
         self.gps_pos_publisher.publish(self.gps_pos_msg)
 
@@ -84,6 +93,7 @@ class MinimalPublisher(Node):
         self.waypoints_msg.data = self.target_waypoint
         self.waypoint_publisher.publish(self.waypoints_msg)
 
+
 def main(args=None):
     rclpy.init(args=args)
 
@@ -95,5 +105,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

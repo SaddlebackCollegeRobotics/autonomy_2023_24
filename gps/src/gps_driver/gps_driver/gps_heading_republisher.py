@@ -39,33 +39,31 @@ class MinimalSubscriber(Node):
     # This callback definition simply prints an info message to the console, along with the data it received.
     def listener_callback(self, heading_msg):
 
-        if heading_msg.gnss_fix_ok and heading_msg.rel_pos_valid:
-            rel_pos_heading = heading_msg.rel_pos_heading
+        # if heading_msg.gnss_fix_ok and heading_msg.rel_pos_valid:
+        rel_pos_heading = heading_msg.heading
 
-            # Convert from 10^-5 degrees scientific notation to standard notation.
-            standard_notation = rel_pos_heading * 10 ** (-5)
-            standard_notation = standard_notation + self.HEADING_OFFSET
-            rel_pos_heading_rad = np.deg2rad(standard_notation)
+        # Convert from 10^-5 degrees scientific notation to standard notation.
+        standard_notation = rel_pos_heading * 10 ** (-5)
+        # standard_notation = standard_notation + self.HEADING_OFFSET
+        rel_pos_heading_rad = np.deg2rad(standard_notation)
 
-            self.get_logger().info(str(standard_notation))
-            self.angle_pub_.publish(Float64(data=float(standard_notation)))
+        self.get_logger().info(str(standard_notation))
+        self.angle_pub_.publish(Float64(data=float(standard_notation)))
 
-            heading_quaternion = self.get_quaternion_from_euler(
-                0, 0, rel_pos_heading_rad
-            )
+        heading_quaternion = self.get_quaternion_from_euler(0, 0, rel_pos_heading_rad)
 
-            self.pose_msg.header.stamp = self.get_clock().now().to_msg()
-            self.pose_msg.header.frame_id = "map"
-            self.pose_msg.pose.orientation.x = heading_quaternion[0]
-            self.pose_msg.pose.orientation.y = heading_quaternion[1]
-            self.pose_msg.pose.orientation.z = heading_quaternion[2]
-            self.pose_msg.pose.orientation.w = heading_quaternion[3]
+        self.pose_msg.header.stamp = self.get_clock().now().to_msg()
+        self.pose_msg.header.frame_id = "map"
+        self.pose_msg.pose.orientation.x = heading_quaternion[0]
+        self.pose_msg.pose.orientation.y = heading_quaternion[1]
+        self.pose_msg.pose.orientation.z = heading_quaternion[2]
+        self.pose_msg.pose.orientation.w = heading_quaternion[3]
 
-            # TODO - Add covariance info.
+        # TODO - Add covariance info.
 
-            self.publisher_.publish(self.pose_msg)
+        self.publisher_.publish(self.pose_msg)
 
-            print("Heading: {:.2f}".format(standard_notation))
+        print("Heading: {:.2f}".format(standard_notation))
 
     # Author: AutomaticAddison.com
     def get_quaternion_from_euler(self, roll, pitch, yaw):
