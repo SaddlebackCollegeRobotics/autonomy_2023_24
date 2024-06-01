@@ -100,11 +100,11 @@ def generate_launch_description():
         # joint_state_publisher_node,
         
         # wgs84_transformer_node,
-        joint_state_publisher_gui_node,
+        # joint_state_publisher_gui_node,
         robot_state_publisher_node,
         # ekf_filter_global_node,
         ekf_filter_local_node,
         # navsat_transform_node,
         # mapviz,
-        rviz_node
+        # rviz_node
     ])
