@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.msg import Float64, Float64MultiArray
+from std_msgs.msg import Float64, Float64MultiArray, String
 from sensor_msgs.msg import NavSatFix, NavSatStatus
 
 from math import atan2, degrees, copysign
@@ -11,39 +11,41 @@ from rclpy.qos import qos_profile_sensor_data
 from geopy.distance import geodesic
 from time import sleep
 
+
 class MinimalPublisher(Node):
 
     FORWARD_SPEED = 1.0
     TURN_SPEED = 0.7
 
-    TARGET_DIST_THRESH = 1 # meters
-    
+    TARGET_DIST_THRESH = 1  # meters
+
     def __init__(self):
 
-        super().__init__('waypoint_navigator')
+        super().__init__("waypoint_navigator")
 
-        self.drive_input_publisher = self.create_publisher(Float64MultiArray, '/drive/control_input', 10)
+        self.drive_input_publisher = self.create_publisher(
+            Float64MultiArray, "/drive/control_input", 10
+        )
 
         self.waypoint_subscriber = self.create_subscription(
-            Float64MultiArray,
-            '/autonomy/waypoints',
-            self.waypoint_callback,
-            10)
+            Float64MultiArray, "/autonomy/waypoints", self.waypoint_callback, 10
+        )
         self.waypoint_subscriber  # prevent unused variable warning
 
         self.gps_fix_subscriber = self.create_subscription(
-            NavSatFix,
-            '/base/fix',
-            self.gps_fix_callback,
-            qos_profile_sensor_data)
+            NavSatFix, "/base/fix", self.gps_fix_callback, qos_profile_sensor_data
+        )
         self.gps_fix_subscriber  # prevent unused variable warning
 
         self.gps_heading_subscriber = self.create_subscription(
             Float64,
-            '/gps/moving_rover/heading_angle',
+            "/gps/moving_rover/heading_angle",
             self.gps_heading_callback,
-            qos_profile_sensor_data)
+            qos_profile_sensor_data,
+        )
         self.gps_heading_subscriber  # prevent unused variable warning
+
+        self.led_pub = self.create_publisher(String, "/led_pub", 10)
 
         self.drive_input_msg = Float64MultiArray()
 
@@ -55,14 +57,14 @@ class MinimalPublisher(Node):
         self.waypoint_list: list = []
         self.waypoint_num = 1
 
-        self.heading_turn_threshold: int = 15 # degrees
+        self.heading_turn_threshold: int = 15  # degrees
 
-        timer_period = 1/10
+        timer_period = 1 / 10
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.timer.cancel()
 
     def gps_fix_callback(self, msg: NavSatFix):
-        
+
         if msg.status.status == NavSatStatus.STATUS_NO_FIX:
             # stop drive sys
             self.gps_fix_ok = False
@@ -82,6 +84,8 @@ class MinimalPublisher(Node):
         while self.timer.is_canceled() == False:
             continue
 
+        self.led_pub.publish("red")
+
         self.current_position = None
         self.current_heading = None
 
@@ -89,21 +93,27 @@ class MinimalPublisher(Node):
         self.waypoint_num = 1
 
         print("Added new waypoints!")
-        print(f"Navigating to waypoint #{self.waypoint_num}: {self.waypoint_list[0]}, {self.waypoint_list[1]}")
-        
+        print(
+            f"Navigating to waypoint #{self.waypoint_num}: {self.waypoint_list[0]}, {self.waypoint_list[1]}"
+        )
+
         self.timer.reset()
 
     def timer_callback(self):
 
-        if len(self.waypoint_list) == 0 or self.gps_fix_ok == False \
-        or self.current_position == None or self.current_heading == None:
+        if (
+            len(self.waypoint_list) == 0
+            or self.gps_fix_ok == False
+            or self.current_position == None
+            or self.current_heading == None
+        ):
             return
 
         current_position = self.current_position
         current_heading = self.current_heading
 
-        x = self.waypoint_list[0] - current_position[0] # latitude diff
-        y = self.waypoint_list[1] - current_position[1] # longitude diff
+        x = self.waypoint_list[0] - current_position[0]  # latitude diff
+        y = self.waypoint_list[1] - current_position[1]  # longitude diff
 
         target_heading = degrees(atan2(y, x))
 
@@ -121,14 +131,15 @@ class MinimalPublisher(Node):
             target_heading = 90 + abs(target_heading)
 
         target_distance = geodesic(
-        (current_position[0], current_position[1]), 
-        tuple(self.waypoint_list[:2])
+            (current_position[0], current_position[1]), tuple(self.waypoint_list[:2])
         ).meters
 
-        print(f"Position: {current_position[0]}, {current_position[1]} \
+        print(
+            f"Position: {current_position[0]}, {current_position[1]} \
                 Heading: {current_heading} \
                 Target Heading: {target_heading} \
-                Target Distance: {target_distance}")
+                Target Distance: {target_distance}"
+        )
 
         movement_output = [0.0, 0.0]
 
@@ -136,18 +147,20 @@ class MinimalPublisher(Node):
             movement_output = [self.FORWARD_SPEED, self.FORWARD_SPEED]
 
             if abs(target_heading - current_heading) > self.heading_turn_threshold:
-                
+
                 heading_delta = abs(current_heading - target_heading)
 
-                if(current_heading < target_heading):
-                    
-                    if(heading_delta < 180):
+                if current_heading < target_heading:
+
+                    if heading_delta < 180:
                         rotation_dir = 1
-                    else: rotation_dir = -1
-                else:
-                    if(heading_delta < 180):
+                    else:
                         rotation_dir = -1
-                    else: rotation_dir = 1
+                else:
+                    if heading_delta < 180:
+                        rotation_dir = -1
+                    else:
+                        rotation_dir = 1
 
                 if rotation_dir == -1:
                     movement_output = [self.TURN_SPEED, self.FORWARD_SPEED]
@@ -155,7 +168,6 @@ class MinimalPublisher(Node):
                     movement_output = [self.FORWARD_SPEED, self.TURN_SPEED]
         else:
 
-            
             if len(self.waypoint_list) > 0:
 
                 self.waypoint_list.pop(0)
@@ -163,12 +175,15 @@ class MinimalPublisher(Node):
 
                 if len(self.waypoint_list) > 0:
                     self.waypoint_num += 1
-                    print(f"Navigating to waypoint #{self.waypoint_num}: {self.waypoint_list[0]}, {self.waypoint_list[1]}")
+                    print(
+                        f"Navigating to waypoint #{self.waypoint_num}: {self.waypoint_list[0]}, {self.waypoint_list[1]}"
+                    )
                 else:
                     print("Finished Navigation!")
 
         self.drive_input_msg.data = movement_output
         self.drive_input_publisher.publish(self.drive_input_msg)
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -181,5 +196,5 @@ def main(args=None):
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
