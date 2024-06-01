@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = "obj_nav"
+package_name = "led_indicator"
 
 setup(
     name=package_name,
@@ -19,7 +19,7 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "listener = obj_nav.subscriber_member_function:main",
+            "listener = led_indicator.led_indicator:main",
         ],
     },
 )
