@@ -87,7 +87,7 @@ class MinimalPublisher(Node):
         while self.timer.is_canceled() == False:
             continue
 
-        self.led_pub.publish("red")
+        self.led_pub.publish(String(data="red"))
 
         self.current_position = None
         self.current_heading = None
