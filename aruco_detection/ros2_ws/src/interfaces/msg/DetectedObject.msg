@@ -1,6 +1,0 @@
-string object_name
-
-geometry_msgs/Point bottom_left
-geometry_msgs/Point top_right
-
-float64 relative_distance
