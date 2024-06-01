@@ -59,6 +59,9 @@ class MinimalPublisher(Node):
 
         self.heading_turn_threshold: int = 15  # degrees
 
+        self.previous_position = None
+        self.est_heading = 0
+
         timer_period = 1 / 10
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.timer.cancel()
@@ -110,7 +113,17 @@ class MinimalPublisher(Node):
             return
 
         current_position = self.current_position
-        current_heading = self.current_heading
+        if self.previous_position is not None:
+            self.est_heading = degrees(
+                atan2(
+                    self.current_position[1] - self.previous_position[1],
+                    self.current_position[0] - self.previous_position[0],
+                )
+            )
+
+        self.previous_position = current_position
+        # current_heading = self.current_heading
+        current_heading = self.est_heading
 
         x = self.waypoint_list[0] - current_position[0]  # latitude diff
         y = self.waypoint_list[1] - current_position[1]  # longitude diff
