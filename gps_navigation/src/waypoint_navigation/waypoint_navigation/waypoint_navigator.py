@@ -122,8 +122,8 @@ class MinimalPublisher(Node):
             )
 
         self.previous_position = current_position
-        # current_heading = self.current_heading
-        current_heading = self.est_heading
+        current_heading = self.current_heading
+        # current_heading = self.est_heading
 
         x = self.waypoint_list[0] - current_position[0]  # latitude diff
         y = self.waypoint_list[1] - current_position[1]  # longitude diff
