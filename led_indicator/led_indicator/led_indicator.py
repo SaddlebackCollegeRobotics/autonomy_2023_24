@@ -24,7 +24,20 @@ class LedIndicator(Node):
         )
 
     def listener_callback(self, msg):
-        serial_input = "#" + str(msg.data) + "%"
+        """Valid strings: 'off' 'red' 'green' 'blue'"""
+        self.get_logger().info(f"Sending request to turn led ({msg.data})!")
+        val = 0
+        if msg.data == "off":
+            val = 0
+        elif msg.data == "red":
+            val = 1
+        elif msg.data == "green":
+            val = 2
+        elif msg.data == "blue":
+            val = 3
+        else:
+            self.get_logger().warn(f"Invalid LED set value ({msg.data})!")
+        serial_input = "#" + str(val) + "%"
         self.serial.write(serial_input.encode())
 
 
