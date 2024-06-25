@@ -10,8 +10,13 @@ from math import atan2, degrees, copysign
 from rclpy.qos import qos_profile_sensor_data
 
 from geopy.distance import geodesic
+from enum import Enum
 from time import sleep
 
+
+class Direction(Enum):
+    Left = 0
+    Right = 1
 
 class MinimalPublisher(Node):
 
@@ -126,27 +131,13 @@ class MinimalPublisher(Node):
             return
 
         current_position = self.current_position
-        # if self.previous_position is not None:
-        #     self.est_heading = (
-        #         (
-        #             degrees(
-        #                 atan2(
-        #                     self.current_position[1] - self.previous_position[1],
-        #                     self.current_position[0] - self.previous_position[0],
-        #                 )
-        #             )
-        #             % 360
-        #         )
-        #         + 90
-        #     ) % 360
-
-        # self.previous_position = current_position
         current_heading = self.current_heading
         current_heading = self.est_heading
 
         x = self.waypoint_list[0] - current_position[0]  # latitude diff
         y = self.waypoint_list[1] - current_position[1]  # longitude diff
 
+        # FIXME: Dead code! (target_distance re-assigned immediately after)
         target_heading = degrees(atan2(y, x))
 
         # Quadrant I
@@ -161,6 +152,7 @@ class MinimalPublisher(Node):
         # Quadrant IV
         elif x > 0 and y < 0:
             target_heading = 90 + abs(target_heading)
+        # FIXME: Dead code! ^^^
 
         target_distance = geodesic(
             (current_position[0], current_position[1]), tuple(self.waypoint_list[:2])
@@ -183,20 +175,21 @@ class MinimalPublisher(Node):
                 heading_delta = abs(current_heading - target_heading)
 
                 if current_heading < target_heading:
-
                     if heading_delta < 180:
-                        rotation_dir = 1
+                        rotation_dir = Direction.left
                     else:
-                        rotation_dir = -1
+                        rotation_dir = Direction.right
                 else:
                     if heading_delta < 180:
-                        rotation_dir = -1
+                        rotation_dir = Direction.right
                     else:
-                        rotation_dir = 1
+                        rotation_dir = Direction.left
 
-                if rotation_dir == -1:
+                if rotation_dir == Direction.left:
+                    # Turn Left: left side slower than right
                     movement_output = [self.TURN_SPEED, self.FORWARD_SPEED]
                 else:
+                    # Turn right: right side slower than left
                     movement_output = [self.FORWARD_SPEED, self.TURN_SPEED]
         else:
 
