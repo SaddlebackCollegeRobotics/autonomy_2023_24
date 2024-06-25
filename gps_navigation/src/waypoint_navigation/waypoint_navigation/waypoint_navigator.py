@@ -137,22 +137,7 @@ class MinimalPublisher(Node):
         x = self.waypoint_list[0] - current_position[0]  # latitude diff
         y = self.waypoint_list[1] - current_position[1]  # longitude diff
 
-        # FIXME: Dead code! (target_distance re-assigned immediately after)
-        target_heading = degrees(atan2(y, x))
-
-        # Quadrant I
-        if x > 0 and y > 0:
-            target_heading = 90 - target_heading
-        # Quadrant II
-        elif x < 0 and y > 0:
-            target_heading = 270 + (180 - target_heading)
-        # Quadrant III
-        elif x < 0 and y < 0:
-            target_heading = 90 + abs(target_heading)
-        # Quadrant IV
-        elif x > 0 and y < 0:
-            target_heading = 90 + abs(target_heading)
-        # FIXME: Dead code! ^^^
+        target_heading = (90 - degrees(atan2(y, x))) % 360
 
         target_distance = geodesic(
             (current_position[0], current_position[1]), tuple(self.waypoint_list[:2])
