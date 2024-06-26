@@ -15,16 +15,21 @@ def generate_launch_description():
             executable='detect_tag',
             name='detect_tag'
         ),
+        # Node(
+        #     package='tag_detection',
+        #     namespace='autonomy',
+        #     executable='move_to_tag',
+        #     name='move_to_tag'
+        # ),
+        # Node(
+        #     package='tag_detection',
+        #     namespace='autonomy',
+        #     executable='aruco_distance_republisher',
+        #     name='distance_repub'
+        # )
         Node(
-            package='tag_detetion',
-            namespace='autonomy',
-            executable='move_to_tag',
-            name='move_to_tag'
-        ),
-        Node(
-            package='tag_detection',
-            namespace='autonomy',
-            executable='dummy_drive',
-            name='drive'
+            package='obj_nav',
+            executable='listener',
+            name='object_navigation'
         )
     ])

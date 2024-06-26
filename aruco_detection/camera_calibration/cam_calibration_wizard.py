@@ -30,7 +30,7 @@ def write_text(image, text, position):
 
 # take photos used in calibration
 def take_photos():
-    device_number = 0
+    device_number = 2
     camera_found = False
     
     global device_name
@@ -58,7 +58,7 @@ def take_photos():
         cv.destroyAllWindows()
 
 
-    cap = cv.VideoCapture(0)
+    cap = cv.VideoCapture(device_number)
     if not cap.isOpened():
         print('no camera devices found')
         return False
