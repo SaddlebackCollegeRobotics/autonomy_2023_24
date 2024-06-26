@@ -3,6 +3,7 @@ from rclpy.node import Node
 
 from std_msgs.msg import Float64, Float64MultiArray
 from sensor_msgs.msg import NavSatFix, NavSatStatus
+from ublox_ubx_msgs.msg import UBXNavRelPosNED
 
 from rclpy.qos import qos_profile_sensor_data
 
@@ -20,35 +21,35 @@ class MinimalPublisher(Node):
             NavSatFix, "/base/fix", qos_profile_sensor_data
         )
         self.gps_heading_publisher = self.create_publisher(
-            Float64, "/gps/moving_rover/heading_angle", qos_profile_sensor_data
+            UBXNavRelPosNED, "/rover/ubx_nav_rel_pos_ned", qos_profile_sensor_data
         )
 
         # test data
 
         self.gps_pos_list = [
-            (2.0, 2.0),
-            (2.0, -2.0),
+            # (2.0, 2.0),
+            # (2.0, -2.0),
             (-2.0, -2.0),
-            (-2.0, 2.0),
-            (0.0, 0.0),
+            # (-2.0, 2.0),
+            # (0.0, 0.0),
         ]
 
         self.heading_list = [
             0,
-            # 45,
-            # 90,
-            # 135,
-            # 180,
-            # 225,
-            # 270,
-            # 315,
-            # 360
+            45,
+            90,
+            135,
+            180,
+            225,
+            270,
+            315,
+            360,
         ]
 
         self.target_waypoint = [0.0, 0.0]
 
         self.gps_pos_msg = NavSatFix()
-        self.gps_heading_msg = Float64()
+        self.gps_heading_msg = UBXNavRelPosNED()
         self.waypoints_msg = Float64MultiArray()
 
         self.gps_pos_list_index = 0
@@ -56,11 +57,11 @@ class MinimalPublisher(Node):
 
         self.publish_waypoints()
 
-        # timer_period = 1 / 5
-        # self.gps_pos_timer = self.create_timer(timer_period, self.publish_gps_pos)
-        # self.gps_heading_timer = self.create_timer(
-        #     timer_period, self.publish_gps_heading
-        # )
+        timer_period = 1 / 5
+        self.gps_pos_timer = self.create_timer(timer_period, self.publish_gps_pos)
+        self.gps_heading_timer = self.create_timer(
+            timer_period, self.publish_gps_heading
+        )
 
     def publish_gps_pos(self):
 
@@ -85,7 +86,7 @@ class MinimalPublisher(Node):
         if self.heading_list_index >= len(self.heading_list):
             self.heading_list_index = 0
 
-        self.gps_heading_msg.data = float(current_heading)
+        self.gps_heading_msg.rel_pos_heading = int(current_heading)
 
         self.gps_heading_publisher.publish(self.gps_heading_msg)
 

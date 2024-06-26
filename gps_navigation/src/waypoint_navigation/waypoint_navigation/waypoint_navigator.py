@@ -18,6 +18,7 @@ class Direction(Enum):
     Left = 0
     Right = 1
 
+
 class MinimalPublisher(Node):
 
     FORWARD_SPEED = 1.0
@@ -44,10 +45,9 @@ class MinimalPublisher(Node):
         self.gps_fix_subscriber  # prevent unused variable warning
 
         self.start_obj_publisher = self.create_publisher(
-            Bool,
-            '/object_detection/active',
-            10)
-        
+            Bool, "/object_detection/active", 10
+        )
+
         self.gps_heading_subscriber = self.create_subscription(
             UBXNavRelPosNED,
             "/rover/ubx_nav_rel_pos_ned",
@@ -80,7 +80,7 @@ class MinimalPublisher(Node):
         if msg.status.status == NavSatStatus.STATUS_NO_FIX:
             # stop drive sys
             self.gps_fix_ok = False
-            ...
+            print("BAD FIX!")
         else:
             self.gps_fix_ok = True
             self.current_position = (msg.latitude, msg.longitude)
@@ -127,11 +127,16 @@ class MinimalPublisher(Node):
             or self.current_position == None
             or self.current_heading == None
         ):
+            # print(
+            #     f"""{len(self.waypoint_list)=}
+            # {self.gps_fix_ok}
+            # {self.current_position}
+            # {self.current_heading}"""
+            # )
             return
 
         current_position = self.current_position
         current_heading = self.current_heading
-        current_heading = self.est_heading
 
         x = self.waypoint_list[0] - current_position[0]  # latitude diff
         y = self.waypoint_list[1] - current_position[1]  # longitude diff
@@ -160,16 +165,16 @@ class MinimalPublisher(Node):
 
                 if current_heading < target_heading:
                     if heading_delta < 180:
-                        rotation_dir = Direction.left
+                        rotation_dir = Direction.Right
                     else:
-                        rotation_dir = Direction.right
+                        rotation_dir = Direction.Left
                 else:
                     if heading_delta < 180:
-                        rotation_dir = Direction.right
+                        rotation_dir = Direction.Left
                     else:
-                        rotation_dir = Direction.left
+                        rotation_dir = Direction.Right
 
-                if rotation_dir == Direction.left:
+                if rotation_dir == Direction.Left:
                     # Turn Left: left side slower than right
                     movement_output = [self.TURN_SPEED, self.FORWARD_SPEED]
                 else:
