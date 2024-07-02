@@ -59,9 +59,7 @@ class MinimalPublisher(Node):
 
         timer_period = 1 / 5
         self.gps_pos_timer = self.create_timer(timer_period, self.publish_gps_pos)
-        self.gps_heading_timer = self.create_timer(
-            timer_period, self.publish_gps_heading
-        )
+        self.gps_heading_timer = self.create_timer(1, self.publish_gps_heading)
 
     def publish_gps_pos(self):
 
@@ -75,7 +73,6 @@ class MinimalPublisher(Node):
         self.gps_pos_msg.longitude = current_pos[1]
 
         self.gps_pos_msg.status.status = NavSatStatus.STATUS_FIX
-
         self.gps_pos_publisher.publish(self.gps_pos_msg)
 
     def publish_gps_heading(self):
