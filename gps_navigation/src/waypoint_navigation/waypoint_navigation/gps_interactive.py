@@ -26,51 +26,52 @@ class GpsInteractive(Node):
 
         self._current_angle = 0.0
 
-
     def changeAngle(self, delta: float):
         self._current_angle += delta
         self._current_angle = float(self._current_angle % 360)
 
         self._gps_pub.publish(Float64(data=self._current_angle))
 
-def input_handler(node: GpsInteractive):
+
+def input_handler(stdscr: curses.window, node: GpsInteractive):
     ANGLE_DELTA = 2
 
     # Init ncurses
-    stdscr = curses.initscr()
-    curses.cbreak() # Process input without <Enter>
-    curses.noecho() # Don't echo user input
-    stdscr.keypad(True) # Custom curses key-codes
+    curses.cbreak()  # Process input without <Enter>
+    curses.noecho()  # Don't echo user input
+    stdscr.keypad(True)  # Custom curses key-codes
 
     try:
         while key := stdscr.getkey():
             if key == "a":
+                stdscr.clear()
                 node.changeAngle(-ANGLE_DELTA)
+                stdscr.addstr("LEFT")
             elif key == "d":
+                stdscr.clear()
                 node.changeAngle(ANGLE_DELTA)
+                stdscr.addstr("RIGHT")
             elif key == "q":
                 print("Safely exiting...")
                 break
     except KeyboardInterrupt:
         print("Interrupt received. Safely exiting...")
 
-    # De-init ncurses
-    curses.nocbreak()
-    stdscr.keypad(False)
-    curses.echo()
-    curses.endwin()
 
 def main():
     rclpy.init()
 
-    node = GpsInteractive()
+    try:
+        node = GpsInteractive()
 
-    # Input handling on a seperate thread
-    input_thread = Thread(target=input_handler, args=(node,))
-    input_thread.start()
+        # Input handling on a seperate thread
+        input_thread = Thread(target=curses.wrapper, args=(input_handler, node))
+        input_thread.start()
 
-    rclpy.spin(node)
-    
+        rclpy.spin(node)
+
+    except KeyboardInterrupt:
+        print("Interrupt received. Safely exiting...")
+
     input_thread.join()
-
     rclpy.shutdown()
