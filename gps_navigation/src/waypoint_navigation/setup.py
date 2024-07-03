@@ -22,6 +22,7 @@ setup(
             "navigator = waypoint_navigation.waypoint_navigator:main",
             "mock_data_publisher = waypoint_navigation.mock_data_publisher:main",
             "heading_repub = waypoint_navigation.heading_repub:main",
+            "gps_interactive = waypoint_navigation.gps_interactive:main",
         ],
     },
 )
