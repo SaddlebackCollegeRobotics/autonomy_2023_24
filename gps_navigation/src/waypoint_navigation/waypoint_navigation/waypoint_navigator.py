@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 
 from std_msgs.msg import Float64, Float64MultiArray, String, Bool
-from ublox_ubx_msgs.msg import UBXNavRelPosNED
+from ublox_ubx_msgs.msg import UBXNavVelNED
 from sensor_msgs.msg import NavSatFix, NavSatStatus
 
 from math import atan2, degrees, copysign
@@ -49,8 +49,8 @@ class MinimalPublisher(Node):
         )
 
         self.gps_heading_subscriber = self.create_subscription(
-            UBXNavRelPosNED,
-            "/rover/ubx_nav_rel_pos_ned",
+            UBXNavVelNED,
+            "/rover/ubx_nav_vel_ned",
             self.gps_heading_callback,
             qos_profile=qos_profile_sensor_data,
         )
@@ -87,7 +87,7 @@ class MinimalPublisher(Node):
 
     def gps_heading_callback(self, msg):
         # stops publishing when cannot find heading
-        self.current_heading = msg.rel_pos_heading
+        self.current_heading = msg.heading / (10 ** 6)
 
     def waypoint_callback(self, msg: Float64MultiArray):
 

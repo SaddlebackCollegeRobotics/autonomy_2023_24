@@ -8,6 +8,7 @@ from std_msgs.msg import Float64
 from ublox_ubx_msgs.msg import UBXNavRelPosNED
 from rclpy.qos import qos_profile_sensor_data
 
+# TODO: New heading type
 
 class HeadingRepub(Node):
     def __init__(self):
