@@ -22,7 +22,7 @@ class Direction(Enum):
 class MinimalPublisher(Node):
 
     FORWARD_SPEED = 1.0
-    TURN_SPEED = 0.7
+    TURN_SPEED = 0.3
 
     TARGET_DIST_THRESH = 1  # meters
 
@@ -66,7 +66,7 @@ class MinimalPublisher(Node):
         self.waypoint_list: list = []
         self.waypoint_num = 1
 
-        self.heading_turn_threshold: int = 15  # degrees
+        self.heading_turn_threshold: int = 30  # degrees
 
         self.previous_position = None
         self.est_heading = 0
@@ -87,7 +87,7 @@ class MinimalPublisher(Node):
 
     def gps_heading_callback(self, msg):
         # stops publishing when cannot find heading
-        self.current_heading = msg.heading / (10 ** 6)
+        self.current_heading = msg.heading / (10 ** 5)
 
     def waypoint_callback(self, msg: Float64MultiArray):
 
@@ -141,7 +141,14 @@ class MinimalPublisher(Node):
         x = self.waypoint_list[0] - current_position[0]  # latitude diff
         y = self.waypoint_list[1] - current_position[1]  # longitude diff
 
-        target_heading = (90 - degrees(atan2(y, x))) % 360
+        print(f"{self.current_position[0]=} {self.current_position[1]=}")
+        print(f"{self.waypoint_list[0]=} {self.waypoint_list[1]=}")
+        print(f"{x=} {y=}")
+
+        target_heading = (270 - degrees(atan2(x, y))) % 360
+        ## target_heading += 90
+        ## target_heading %= 360
+
 
         target_distance = geodesic(
             (current_position[0], current_position[1]), tuple(self.waypoint_list[:2])
@@ -174,12 +181,16 @@ class MinimalPublisher(Node):
                     else:
                         rotation_dir = Direction.Right
 
-                if rotation_dir == Direction.Left:
+                if rotation_dir == Direction.Right:
                     # Turn Left: left side slower than right
+                    print(f"Turning RIGHT {heading_delta=} {target_heading=} {current_heading=}")
                     movement_output = [self.TURN_SPEED, self.FORWARD_SPEED]
                 else:
+                    print(f"Turning LEFT {heading_delta=} {target_heading=} {current_heading=}")
                     # Turn right: right side slower than left
                     movement_output = [self.FORWARD_SPEED, self.TURN_SPEED]
+            else:
+                print("FORWARD")
         else:
 
             if len(self.waypoint_list) > 0:
